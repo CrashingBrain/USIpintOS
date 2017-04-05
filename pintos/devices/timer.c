@@ -216,7 +216,6 @@ static void timer_interrupt (struct intr_frame *args UNUSED){
     	sema_up (&t->semaphore_timer);
     	list_pop_front (&sleeping_threads);
 	}
-
 	//we allow interrupts now on the current thread
 	intr_set_level (previous_level);
 }

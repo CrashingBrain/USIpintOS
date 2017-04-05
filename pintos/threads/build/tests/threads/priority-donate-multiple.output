@@ -19,7 +19,7 @@ Executing 'priority-donate-multiple':
 (priority-donate-multiple) end
 Execution of 'priority-donate-multiple' complete.
 Timer: 86 ticks
-Thread: 0 idle ticks, 88 kernel ticks, 0 user ticks
+Thread: 0 idle ticks, 89 kernel ticks, 0 user ticks
 Console: 903 characters output
 Keyboard: 0 keys pressed
 Powering off..========================================================================

@@ -15,6 +15,9 @@
 #include "userprog/process.h"
 #endif
 
+#include "fpr_arith.h"
+#include "devices/timer.h"
+
 /* Random value for struct thread's `magic' member.
    Used to detect stack overflow.  See the big comment at the top
    of thread.h for details. */
@@ -54,6 +57,8 @@ static long long user_ticks;    /* # of timer ticks in user programs. */
 #define TIME_SLICE 4            /* # of timer ticks to give each thread. */
 static unsigned thread_ticks;   /* # of timer ticks since last yield. */
 
+static FPReal load_avg; /* stores the average load of the CPU. At boot it's initialized to 0*/
+
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
    Controlled by kernel command-line option "-o mlfqs". */
@@ -92,6 +97,8 @@ thread_init (void)
   lock_init (&tid_lock);
   list_init (&ready_list);
   list_init (&all_list);
+
+  load_avg = INT_TO_FPR(0);
 
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
@@ -137,6 +144,52 @@ thread_tick (void)
   /* Enforce preemption. */
   if (++thread_ticks >= TIME_SLICE)
     intr_yield_on_return ();
+
+  if (thread_mlfqs && (timer_ticks () % TIMER_FREQ == 0)) /* every second and if flag is on*/
+  {
+      /* Update load average */
+      int n_threads = 0;
+
+      n_threads = list_size(&ready_list);
+      if (thread_current() != idle_thread)
+        n_threads++;
+      // struct list_elem *e;
+
+      // for (e = list_begin (&all_list); e != list_end (&all_list);
+      //    e = list_next (e))
+      // {
+      //   struct thread *t = list_entry (e, struct thread, allelem);
+      //   if (t->status == THREAD_READY || t->status == THREAD_RUNNING){
+      //     n_threads++;
+      //   }
+      // }
+
+    load_avg = FPR_ADD_FPR(FPR_MUL_FPR(load_avg, INT_DIV_INT(59,60)), 
+      FPR_MUL_INT(INT_DIV_INT(1,60), n_threads));
+
+    /* Update recent-cpu */
+    thread_update_recent_cpu(t);
+    // t->recent_cpu = FPR_ADD_INT(FPR_MUL_FPR(FPR_DIV_FPR(FPR_MUL_INT(load_avg,2),FPR_ADD_INT(FPR_MUL_INT(2,load_avg), 1)),t->recent_cpu),t->nice);
+
+  } else if(thread_mlfqs && !((int) timer_ticks % 4 == 0)) {/* every tick that isn't a whole second and if flag is on*/
+    //recalculate priority on every thread
+    enum intr_level old_level = intr_disable ();
+    thread_foreach(thread_update_priority, NULL);
+    intr_set_level (old_level);
+  } 
+  if (thread_mlfqs && t->status == THREAD_RUNNING) {
+    FPR_INC(&(t->recent_cpu));
+  }
+  
+}
+
+void thread_update_priority(struct thread * t){
+  t->priority = PRI_MAX - FPR_TO_INT(FPR_SUB_INT(FPR_DIV_INT(t->recent_cpu, 4) , t->nice * 2));
+}
+
+void thread_update_recent_cpu (struct thread * t){
+  t->recent_cpu = FPR_ADD_INT(FPR_MUL_FPR(FPR_DIV_FPR(FPR_MUL_INT(load_avg,2),FPR_ADD_INT(FPR_MUL_INT(load_avg, 2), 1)),t->recent_cpu),t->nice);
+
 }
 
 /* Prints thread statistics. */
@@ -383,33 +436,51 @@ thread_get_priority (void)
 
 /* Sets the current thread's nice value to NICE. */
 void
-thread_set_nice (int nice UNUSED)
+thread_set_nice (int nice)
 {
-  /* Not yet implemented. */
+  bool yield = false;
+  struct thread *tcurrent = thread_current ();
+  tcurrent->nice = nice;
+
+  /* Recalculate priority. */
+  if (thread_mlfqs)
+  {
+    thread_update_priority (tcurrent);
+
+    enum intr_level old_level = intr_disable ();
+    if (!list_empty (&ready_list))
+    {
+      struct thread *tmax;
+      tmax = list_entry (list_front (&ready_list), struct thread, elem);
+      if (tcurrent->priority <= tmax->priority)
+        yield = true;
+    }
+    intr_set_level (old_level);
+
+    if (yield)
+      thread_yield ();
+  }
 }
 
 /* Returns the current thread's nice value. */
 int
 thread_get_nice (void)
 {
-  /* Not yet implemented. */
-  return 0;
+  return thread_current()->nice;
 }
 
 /* Returns 100 times the system load average. */
 int
 thread_get_load_avg (void)
 {
-  /* Not yet implemented. */
-  return 0;
+  return FPR_TO_INT(FPR_MUL_INT(load_avg, 100));
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 int
 thread_get_recent_cpu (void)
 {
-  /* Not yet implemented. */
-  return 0;
+  return FPR_TO_INT(FPR_MUL_INT(thread_current()->recent_cpu, 100));
 }
 
 //compare function used to determine the thread having the shortest wakeup_time
@@ -521,11 +592,13 @@ init_thread (struct thread *t, const char *name, int priority)
   t->magic = THREAD_MAGIC;
   sema_init (&t->semaphore_timer, 0);
 
+  if (thread_mlfqs)
+  {
+    t->nice = 0;
+    t->recent_cpu = 0;
+  }
+
   list_push_back (&all_list, &t->allelem);
-
-
-
-
 
 }
 

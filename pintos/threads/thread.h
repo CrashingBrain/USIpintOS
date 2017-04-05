@@ -5,6 +5,7 @@
 #include <list.h>
 #include <stdint.h>
 #include "threads/synch.h"
+#include "fpr_arith.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -97,6 +98,8 @@ struct thread
     int64_t wakeup_time;
     struct semaphore semaphore_timer;
     struct list_elem current_timer;
+    int nice;
+    FPReal recent_cpu;
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
@@ -146,4 +149,7 @@ int thread_get_load_avg (void);
 /* My funcs*/
 bool thread_compare_wakeup_time (const struct list_elem *left, const struct list_elem *right, void *aux UNUSED);
 bool thread_compare_priority (const struct list_elem * left, const struct list_elem * right, void *aux UNUSED);
+void thread_update_priority(struct thread * t);
+void thread_update_recent_cpu (struct thread * t);
+
 #endif /* threads/thread.h */
