@@ -20,10 +20,6 @@
 /* Number of timer ticks since OS booted. */
 static int64_t ticks;
 
-/* My structs*/
-/* List of sleeping threads. it is updated by timer_sleep. */
-static struct list sleeping_threads;
-
 /* Number of loops per timer tick.
    Initialized by timer_calibrate(). */
 static unsigned loops_per_tick;
@@ -41,8 +37,6 @@ timer_init (void)
 {
   pit_configure_channel (0, 2, TIMER_FREQ);
   intr_register_ext (0x20, timer_interrupt, "8254 Timer");
-
-  list_init(&sleeping_threads);
 }
 
 /* Calibrates loops_per_tick, used to implement brief delays. */
@@ -90,37 +84,24 @@ timer_elapsed (int64_t then)
   return timer_ticks () - then;
 }
 
-//this function makes the current thread sleep for 'ticks' ticks
+/* Sleeps for approximately TICKS timer ticks.  Interrupts must
+   be turned on. */
 void
-timer_sleep (int64_t ticks){
-	/* OLD IMPLEMENTATION
-	int64_t start = timer_ticks ();
+timer_sleep (int64_t ticks)
+{
+  if(ticks <= 0){
+    return;
+  }
+  ASSERT (intr_get_level () == INTR_ON);
+  // Assign the requested sleep time to the currently running thread.
+  thread_current() -> wakeup_time = ticks;
+  // Disable the interrupts.
+  enum intr_level old_level = intr_disable();
+  // Block the running thread
+  thread_block();
+  // Set the interrupt to the level used before the block of the thread.
+  intr_set_level(old_level);
 
-	ASSERT (intr_get_level () == INTR_ON);
-	while (timer_elapsed (start) < ticks)
-	    thread_yield ();
-	*/
-	/* NEW IMPLEMENTATION */
-
-	struct thread *t = thread_current ();
-
-	//if ticks are negative, we return
-	if (0 > ticks)
-	return;
-
-	//we make the thread sleep until ticks + timer_ticks
-	t->wakeup_time = timer_ticks () + ticks;
-
-
-	ASSERT (intr_get_level () == INTR_ON);
-
-	//we disable the interrupts, we're entering a critical section
-	intr_disable ();
-	list_insert_ordered (&sleeping_threads, &t->current_timer, thread_compare_wakeup_time, NULL);
-	intr_enable ();
-
-	//we make the thread block itself using a semaphore
-	sema_down (&t->semaphore_timer);
 }
 
 /* Sleeps for approximately MS milliseconds.  Interrupts must be
@@ -192,33 +173,34 @@ timer_print_stats (void)
 {
   printf ("Timer: %"PRId64" ticks\n", timer_ticks ());
 }
-
-/* Timer interrupt handler. */
-static void timer_interrupt (struct intr_frame *args UNUSED){
 
-	//we add ticks, we make the current thread tick
-	ticks++;
-	thread_tick ();
-
-	//critical section, we disable interrupts
-	enum intr_level previous_level = intr_disable ();
-
-	//we iterate over the threads sleeping
-	//if we find a thread whose wakeup time is less or equal than ticks,
-	//we call sema_up on its semaphore and pop it from sleeping threads,
-	//effectively waking it up
-	struct thread * t;
-	while (!list_empty (&sleeping_threads)){
-		t = list_entry (list_front (&sleeping_threads), struct thread, current_timer);
-    	if ( ticks < t->wakeup_time ){
-			break;
-		}
-    	sema_up (&t->semaphore_timer);
-    	list_pop_front (&sleeping_threads);
-	}
-	//we allow interrupts now on the current thread
-	intr_set_level (previous_level);
+static void
+unblock_possible_threads(struct thread *thread1)
+{
+  if(thread1 -> status == THREAD_BLOCKED)
+  {
+    if(thread1 -> wakeup_time > 0)
+    {
+      thread1 -> wakeup_time--;
+      if(thread1 -> wakeup_time == 0)
+      {
+        thread_unblock(thread1);
+      }
+    }
+  }
 }
+
+/* Timer interrupt handler. */
+static void
+timer_interrupt (struct intr_frame * arguments)
+{
+  ticks++;
+  thread_tick ();
+  // Check every thread and execute unblock_possible_threads().
+  thread_foreach(unblock_possible_threads, 0);
+}
+
+
 
 /* Returns true if LOOPS iterations waits for more than one timer
    tick, otherwise false. */

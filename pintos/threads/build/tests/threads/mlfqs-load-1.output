@@ -18,7 +18,7 @@ Executing 'mlfqs-load-1':
 (mlfqs-load-1) end
 Execution of 'mlfqs-load-1' complete.
 Timer: 5327 ticks
-Thread: 1000 idle ticks, 4330 kernel ticks, 0 user ticks
+Thread: 1000 idle ticks, 4329 kernel ticks, 0 user ticks
 Console: 646 characters output
 Keyboard: 0 keys pressed
 Powering off...
