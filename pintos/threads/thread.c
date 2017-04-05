@@ -209,6 +209,15 @@ thread_create (const char *name, int priority,
   /* Add to run queue. */
   thread_unblock (t);
 
+
+  if (t->priority > thread_current()->priority)
+  {
+    ASSERT (!intr_context ());
+    thread_yield ();
+  }
+
+
+
   return tid;
 }
 
@@ -245,8 +254,7 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  // list_push_back (&ready_list, &t->elem);
-  list_insert_ordered(&ready_list, &t->elem, thread_compare_priority, 0);
+  list_insert_ordered(&ready_list, &t->elem, thread_compare_priority, NULL);
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
@@ -317,8 +325,7 @@ thread_yield (void)
 
   old_level = intr_disable ();
   if (cur != idle_thread)
-    // list_push_back (&ready_list, &cur->elem);
-    list_insert_ordered(&ready_list, &cur->elem, thread_compare_priority, 0);
+    list_insert_ordered(&ready_list, &cur->elem, thread_compare_priority, NULL);
   cur->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
@@ -346,13 +353,25 @@ thread_foreach (thread_action_func *func, void *aux)
 void
 thread_set_priority (int new_priority)
 {
+  bool yield=false;
+
   thread_current ()->priority = new_priority;
-  const struct list_elem *head_elem = list_begin(&ready_list);
+
+  enum intr_level old_level = intr_disable ();
+
+  const struct list_elem *head_elem = list_front(&ready_list);
   const struct thread *head_thread = list_entry(head_elem, struct thread, elem);
   if (head_thread->priority > new_priority)
   {
-    thread_yield();
+    yield=true;
   }
+
+  intr_set_level (old_level);
+
+  if (yield){
+    thread_yield ();
+  }
+
 }
 
 /* Returns the current thread's priority. */
@@ -410,7 +429,7 @@ bool thread_compare_priority (const struct list_elem * left, const struct list_e
   const struct thread *thread_right = list_entry (right, struct thread, current_timer);
   const struct thread *thread_left = list_entry (left, struct thread, current_timer);
 
-  return thread_left < thread_right;
+  return thread_left->priority > thread_right->priority;
 }
 
 
@@ -498,10 +517,16 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
+
   t->magic = THREAD_MAGIC;
   sema_init (&t->semaphore_timer, 0);
 
   list_push_back (&all_list, &t->allelem);
+
+
+
+
+
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
