@@ -14,12 +14,7 @@ Executing 'priority-sema':
 (priority-sema) Back in main thread.
 (priority-sema) Back in main thread.
 (priority-sema) Back in main thread.
-(priority-sema) (priority-sema) Thread priority 27 woke up.
-(priority-sema) Thread priority 26 woke up.
-(priority-sema) Thread priority 25 woke up.
-(priority-sema) Thread priority 24 woke up.
-(priority-sema) Thread priority 23 woke up.
-Back in main thread.
+(priority-sema) Back in main thread.
 (priority-sema) Back in main thread.
 (priority-sema) Back in main thread.
 (priority-sema) Back in main thread.
@@ -27,9 +22,9 @@ Back in main thread.
 (priority-sema) Back in main thread.
 (priority-sema) end
 Execution of 'priority-sema' complete.
-Timer: 123 ticks
-Thread: 0 idle ticks, 126 kernel ticks, 0 user ticks
-Console: 970 characters output
+Timer: 98 ticks
+Thread: 0 idle ticks, 100 kernel ticks, 0 user ticks
+Console: 749 characters output
 Keyboard: 0 keys pressed
 Powering off...
 ========================================================================
