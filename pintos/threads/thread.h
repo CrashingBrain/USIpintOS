@@ -96,7 +96,6 @@ struct thread
     struct list_elem elem;              /* List element. */
     /* My fields*/
     int64_t wakeup_time;
-    struct semaphore semaphore_timer;
     struct list_elem current_timer;
     int nice;
     FPReal recent_cpu;
