@@ -33,10 +33,6 @@ extern test_func test_mlfqs_nice_2;
 extern test_func test_mlfqs_nice_10;
 extern test_func test_mlfqs_block;
 
-// MY OWN TESTS
-// extern test_func test_hello;
-extern test_func test_lists;
-
 void msg (const char *, ...);
 void fail (const char *, ...);
 void pass (void);
