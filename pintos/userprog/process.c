@@ -222,6 +222,8 @@ load (const char *file_name, void (**eip) (void), void **esp)
   process_activate ();
 
   /* Open executable file. */
+  char* actual_name;
+  file_name = strtok_r(file_name, " ", &actual_name);
   file = filesys_open (file_name);
   if (file == NULL) 
     {
@@ -437,7 +439,7 @@ setup_stack (void **esp)
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success)
-        *esp = PHYS_BASE;
+        *esp = PHYS_BASE -12;
       else
         palloc_free_page (kpage);
     }
