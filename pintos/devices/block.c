@@ -164,18 +164,18 @@ block_type (struct block *block)
 void
 block_print_stats (void)
 {
-  int i;
+  // int i;
 
-  for (i = 0; i < BLOCK_CNT; i++)
-    {
-      struct block *block = block_by_role[i];
-      if (block != NULL)
-        {
-          printf ("%s (%s): %llu reads, %llu writes\n",
-                  block->name, block_type_name (block->type),
-                  block->read_cnt, block->write_cnt);
-        }
-    }
+  // for (i = 0; i < BLOCK_CNT; i++)
+  //   {
+  //     struct block *block = block_by_role[i];
+  //     if (block != NULL)
+  //       {
+  //         printf ("%s (%s): %llu reads, %llu writes\n",
+  //                 block->name, block_type_name (block->type),
+  //                 block->read_cnt, block->write_cnt);
+  //       }
+  //   }
 }
 
 /* Registers a new block device with the given NAME.  If
