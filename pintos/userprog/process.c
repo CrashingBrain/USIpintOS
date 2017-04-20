@@ -498,22 +498,22 @@ setup_stack (void **esp, char ** arguments, int argc)
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success){
-
+      // *esp = PHYS_BASE;
 		  int chars_pushed = 0;
 		  int i = argc;
 
 		  int ** begins = malloc(sizeof(int *) * 128);
-
+      printf("&&STACK:\n");
 		  while (i != 0){
 			  int j = 0;
 			  *(begins+i) = chars_pushed;
-			  printf("ARGV[%d]:", i);
+			  printf("ARGV[%d]:\t", i);
 			  int length = strlen(*(arguments+i-1));
 			  while (j < length){
 				//   printf("hi\n");
 				if(*(*(arguments+i-1)+j) == '\0') break;
 				  *(esp+chars_pushed) = *(*(arguments+i-1)+j);
-				  printf("%c", *(esp+chars_pushed));
+				  printf("%c\t\t%p", *(esp+chars_pushed), esp+chars_pushed);
 				  chars_pushed++;
 				  j++;
 			  }
@@ -533,37 +533,37 @@ setup_stack (void **esp, char ** arguments, int argc)
 		  *(esp+chars_pushed) = word_align;
 		  chars_pushed++;
 
-		  printf("word-align: %d\n", (int) word_align);
+		  printf("word-align:\t%d\t\t%p\n", (int) word_align, esp+chars_pushed-1);
 
 
 		  //last argv
 		  *(esp+chars_pushed) = 0;
+      printf("ARGV[%d]:\t%d\t\t%p\n", (int) argc+1, *(esp+chars_pushed), esp+chars_pushed);
 		  chars_pushed++;
 
-		  printf("ARGV[%d]: 0\n", (int) argc+1);
 
 
 		  i=argc;
 		  while( i != 0 ){
 			  *(esp+chars_pushed)= *(begins+i);
-			  printf("ARG[%d]: %p\n", i, *(esp+chars_pushed));
+			  printf("ARG[%d]:\t\t%p\t\t%p\n", i, *(esp+chars_pushed), esp+chars_pushed);
 			  chars_pushed++;
 			  i--;
 		  }
 
 		  *(esp+chars_pushed) = begins;
+      printf("argv:\t\t%p\t%p\n", *(esp+chars_pushed), esp+chars_pushed);
 		  chars_pushed++;
 
-		  printf("argv: %p\n", begins);
 
 		  *(esp+chars_pushed) = argc;
+      printf("argc:\t\t%d\t\t%p\n", (int) *(esp+chars_pushed), esp+chars_pushed);
 		  chars_pushed++;
 
-		  printf("argc: %d\n", (int) *(esp+chars_pushed));
 
 		  *(esp+chars_pushed) = 0;
 
-		  printf("return value: %d\n", (int) *(esp+chars_pushed));
+		  printf("return value:\t%d\t\t%p\n", (int) *(esp+chars_pushed), esp+chars_pushed);
 
 
 
