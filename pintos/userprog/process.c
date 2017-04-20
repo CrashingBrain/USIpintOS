@@ -498,27 +498,108 @@ setup_stack (void **esp, char ** arguments, int argc)
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success){
-		  //return address
-			  *(esp+1) = 0;
-			//argc
-			*(esp+2) = argc;
 
-			int i = 0;
-			while (i != argc){
-				*(esp+3+i) = *(arguments+i);
-				i++;
-			}
+		  int chars_pushed = 0;
+		  int i = argc;
+
+		  int ** begins = malloc(sizeof(int *) * 128);
+
+		  while (i != 0){
+			  int j = 0;
+			  *(begins+i) = chars_pushed;
+			  printf("ARGV[%d]:", i);
+			  int length = strlen(*(arguments+i-1));
+			  while (j < length){
+				//   printf("hi\n");
+				if(*(*(arguments+i-1)+j) == '\0') break;
+				  *(esp+chars_pushed) = *(*(arguments+i-1)+j);
+				  printf("%c", *(esp+chars_pushed));
+				  chars_pushed++;
+				  j++;
+			  }
+			  printf("\n");
+			  i--;
+		  }
+
+		  uint8_t word_align = 0;
+		  int temp = chars_pushed;
+
+		  while ( !(esp+temp % 4) ){
+			  temp++;
+			  word_align++;
+		  }
 
 
-			i = 0;
-			printf("stack dump:\n");
-			printf("BSP: %p\n", *(esp+1));
-			printf("ARGC: %d\n", (int)*(esp+2));
+		  *(esp+chars_pushed) = word_align;
+		  chars_pushed++;
 
-			while (i < argc){
-				printf("ARGV[%d]: %s\n", i, (char *) *(esp+3+i));
-				i++;
-			}
+		  printf("word-align: %d\n", (int) word_align);
+
+
+		  //last argv
+		  *(esp+chars_pushed) = 0;
+		  chars_pushed++;
+
+		  printf("ARGV[%d]: 0\n", (int) argc+1);
+
+
+		  i=argc;
+		  while( i != 0 ){
+			  *(esp+chars_pushed)= *(begins+i);
+			  printf("ARG[%d]: %p\n", i, *(esp+chars_pushed));
+			  chars_pushed++;
+			  i--;
+		  }
+
+		  *(esp+chars_pushed) = begins;
+		  chars_pushed++;
+
+		  printf("argv: %p\n", begins);
+
+		  *(esp+chars_pushed) = argc;
+		  chars_pushed++;
+
+		  printf("argc: %d\n", (int) *(esp+chars_pushed));
+
+		  *(esp+chars_pushed) = 0;
+
+		  printf("return value: %d\n", (int) *(esp+chars_pushed));
+
+
+
+
+			//
+			// i = 0;
+			// printf("stack dump:\n");
+			// int words_counted = 0;
+			// while (i != argc){
+			// 	printf("ARGV[%d]: ", argc-words_counted);
+			// 	while(*(esp+i) != '\0'){
+			// 		printf("%c", (char) *(esp+i));
+			// 		i++;
+			// 	}
+			// 	printf("\n");
+			// 	words_counted++;
+			// }
+			//
+			// printf("word-align: %d\n", (int) *(esp+i));
+			//
+			// words_counted = 0;
+			// while (words_counted != argc+1){
+			// 	printf("ARGV[%d]: %p\n", (int) argc-words_counted, *(esp+i));
+			// 	words_counted++;
+			// 	i++;
+			// }
+			//
+			// printf("argv: %p\n", *(esp+i));
+			// i++;
+			// printf("argc: %d\n", (int) *(esp+i));
+			// i++;
+			// printf("return value: %d\n", (int) *(esp+i));
+			//
+			//
+
+
 	  }
 
 
