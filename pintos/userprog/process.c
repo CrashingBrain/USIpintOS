@@ -59,6 +59,7 @@ start_process (void *file_name_)
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
+  /* the actual name of the program is the first token in string */
   success = load (file_name, &if_.eip, &if_.esp);
 
   /* If load failed, quit. */
@@ -221,9 +222,11 @@ load (const char *file_name, void (**eip) (void), void **esp)
     goto done;
   process_activate ();
 
+  /* divide the file_name in tokens */
+  char* arguments;
+  file_name = strtok_r(file_name, " ", &arguments);
+
   /* Open executable file. */
-  char* actual_name;
-  file_name = strtok_r(file_name, " ", &actual_name);
   file = filesys_open (file_name);
   if (file == NULL) 
     {
@@ -439,7 +442,7 @@ setup_stack (void **esp)
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success)
-        *esp = PHYS_BASE -12;
+        *esp = PHYS_BASE-12;
       else
         palloc_free_page (kpage);
     }
