@@ -17,14 +17,14 @@ static void
 syscall_handler (struct intr_frame *f UNUSED) 
 {
 	//TODO here handle printf and exit
-  printf ("system call!\n");
+  // printf ("system call!\n");
   int sysnumber = * (int *) f->esp;
   int * esp = f->esp;
-  printf("%d\n", sysnumber);
+  // printf("%d\n", sysnumber);
   switch(sysnumber){
   	case SYS_WRITE: // second to do
   		{
-        printf("fd : %d buff: %s size: %d\n", *(esp+1), *(esp+2), * (char*) (esp+3));
+        // printf("fd : %d buff: %s size: %d\n", *(esp+1), *(esp+2), * (char*) (esp+3));
   			if (*(esp+1) == 1) putbuf(*(esp+2), *(esp+3));
   			break;
   		}
