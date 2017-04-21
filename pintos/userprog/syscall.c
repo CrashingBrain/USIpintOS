@@ -25,13 +25,16 @@ syscall_handler (struct intr_frame *f UNUSED)
   	case SYS_WRITE: // second to do
   		{
         // printf("fd : %d buff: %s size: %d\n", *(esp+1), *(esp+2), * (char*) (esp+3));
-  			if (*(esp+1) == 1) putbuf(*(esp+2), *(esp+3));
+  			if (*(esp+1) == 1) {
+          // printf("\nprintf: %s\nputbuf: ", *(esp+2));
+          putbuf(*(esp+2), *(esp+3));
+        }
   			break;
   		}
   	case SYS_EXIT: //first to do
   		{
-        printf("status: %d\n", * (int *) esp + 1);
-  			exit(* (int *) esp + 1 );
+        // printf("status: %d %d\n", * (int *) esp, * (int *)(esp + 1));
+  			exit(* (int *)(esp + 1));
   			break;
   		}
   	default:
