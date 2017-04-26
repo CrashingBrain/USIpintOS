@@ -50,6 +50,7 @@ void exit (int status)
   //   {
   //     cur->cp->status = status;
   //   }
-  printf ("%s: exit(%d)\n", cur->name, status);
+
+  printf ("%s: exit(%d)\n", strtok_r(cur->name, " "), status);
   thread_exit();
 }
