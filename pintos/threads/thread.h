@@ -116,6 +116,10 @@ struct thread
     int priority;                       /* Priority. */
     int nice;                           /* Niceness value. */
     FPReal recent_cpu;                  /* Recent cpu usage of the thread. */
+
+    /* Used for userprof/process_wait */
+    tid_t parentId;
+    
   };
 
 /* If false (default), use round-robin scheduler.
