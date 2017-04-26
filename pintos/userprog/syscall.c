@@ -16,8 +16,6 @@ syscall_init (void)
 static void
 syscall_handler (struct intr_frame *f UNUSED) 
 {
-	//TODO here handle printf and exit
-  // printf ("system call!\n");
   int sysnumber = * (int *) f->esp;
   int * esp = f->esp;
   // printf("%d\n", sysnumber);
@@ -46,10 +44,6 @@ syscall_handler (struct intr_frame *f UNUSED)
 void exit (int status)
 {
   struct thread *cur = thread_current();
-  // if (thread_alive(cur->parent))
-  //   {
-  //     cur->cp->status = status;
-  //   }
 
   printf ("%s: exit(%d)\n", strtok_r(cur->name, " "), status);
   thread_exit();

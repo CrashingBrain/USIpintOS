@@ -260,61 +260,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
       fields[words] = arg;
       words++;
     }
-  // char tokens[16][128];
 
-  // int begins [128];
-  // int ends [128];
-
-  // int m = 0;
-  // int begin = 0;
-  // int end = 0;
-
-  // int words = 0;
-  // while (m < (int) strlen(arguments)){
-	 //  char current_letter = *(arguments+m);
-	 //  if(current_letter == ' '){
-		//   end = m;
-		//   begins[words] = begin;
-		//   ends[words] = end;
-		// //   printf("begin: %d, end: %d\n", begin, end);
-		//   m++;
-		//   words++;
-		//   begin = m;
-	 //  } else {
-		//   m++;
-	 //  }
-  // }
-  // // printf("begin: %d, end: %d\n", begin, strlen(arguments));
-  // begins[words] = begin;
-  // ends[words] = strlen(arguments);
-  // words++;
-
-  // int j = 0;
-  // printf("fields:\n");
-  // char ** fields = malloc(sizeof(char)*128);
-  // // char fields [8][128];
-
-  // while (j < words){
-	 //  int k = 0;
-
-	 //  int a = begins[j];
-	 //  int b = ends[j];
-	 //  int len = b - a;
-
-	 //  *(fields+j) = malloc(sizeof(char)*len+1);
-
-
-	 //  while (k < len){
-		//   char curr_letter = *(arguments+k+a);
-		//   printf("%c", curr_letter);
-		//   *(*(fields+j)+k) = curr_letter;
-		// // fields[j][k] = curr_letter;
-		//   k++;
-	 //  }
-	 //  *(*(fields+j)+k) = '\0';
-	 //  printf("\n");
-	 //  j++;
-  // }
 
   /* Open executable file. */
   file = filesys_open (file_name);
@@ -584,74 +530,7 @@ setup_stack (void **esp, char ** arguments, int argc)
       char* retaddr = PHYS_BASE;
       memcpy(*esp, &retaddr, sizeof(void*));
       // printf("return:\t\t%p\t\t%p\n", *((char*) *esp), *esp);
-
-      // a
-		  // int chars_pushed = 0;
-		  // int i = argc;
-
-		  // int ** begins = malloc(sizeof(int *) * 128);
-    //   printf("&&STACK:\n");
-		  // while (i != 0){
-			 //  int j = 0;
-			 //  *(begins+i) = chars_pushed;
-			 //  printf("ARGV[%d]:\t", i);
-			 //  int length = strlen(*(arguments+i-1));
-			 //  while (j < length){
-				// //   printf("hi\n");
-				// if(*(*(arguments+i-1)+j) == '\0') break;
-				//   *(esp-chars_pushed-1) = *(*(arguments+i-1)+j);
-				//   printf("%c\t\t%p", *(esp-chars_pushed), esp-chars_pushed);
-				//   chars_pushed++;
-				//   j++;
-			 //  }
-			 //  printf("\n");
-			 //  i--;
-		  // }
-
-
-
-		  // *(esp-chars_pushed) = word_align;
-		  // chars_pushed++;
-
-		  // printf("word-align:\t%d\t\t%p\n", (int) word_align, esp-chars_pushed-1);
-
-
-		  // //last argv
-		  // *(esp-chars_pushed) = 0;
-    //   printf("ARGV[%d]:\t%d\t\t%p\n", (int) argc+1, *(esp-chars_pushed), esp-chars_pushed);
-		  // chars_pushed++;
-
-
-
-		  // i=argc;
-		  // while( i != 0 ){
-			 //  *(esp-chars_pushed)= *(begins+i);
-			 //  printf("ARG[%d]:\t\t%p\t\t%p\n", i, *(esp-chars_pushed), esp-chars_pushed);
-			 //  chars_pushed++;
-			 //  i--;
-		  // }
-
-		  // *(esp-chars_pushed) = begins;
-    //   printf("argv:\t\t%p\t%p\n", *(esp-chars_pushed), esp-chars_pushed);
-		  // chars_pushed++;
-
-
-		  // *(esp-chars_pushed) = argc;
-    //   printf("argc:\t\t%d\t\t%p\n", (int) *(esp-chars_pushed), esp-chars_pushed);
-		  // chars_pushed++;
-
-
-		  // *(esp-chars_pushed) = 0;
-
-		  // printf("return value:\t%d\t\t%p\n", (int) *(esp+chars_pushed), esp+chars_pushed);
-
-
 	  }
-
-
-
-
-
       else{
         palloc_free_page (kpage);
 	}
