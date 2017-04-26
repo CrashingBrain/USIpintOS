@@ -39,7 +39,8 @@ process_execute (const char *file_name)
   strlcpy (fn_copy, file_name, PGSIZE);
 
   /* Create a new thread to execute FILE_NAME. */
-  tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
+  struct thread *t = thread_current ();
+  tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy, t->tid);
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy);
   return tid;
@@ -87,12 +88,22 @@ start_process (void *file_name_)
    This function will be implemented in problem 2-2.  For now, it
    does nothing. */
 int
-process_wait (tid_t child_tid UNUSED)
+process_wait (tid_t child_tid)
 {
-  while(true){
-    //TODO ripperoni togli il loop infinito
+  struct thread * child = thread_get_by_tid(child_tid);
+  struct thread * current = thread_current();
+
+  if(child != NULL && (current->tid == child->parentId) ){
+    enum intr_level old_lvl = intr_disable ();
+    thread_block();
+    intr_set_level (old_lvl);
+
+    return 0;
+
+  } else{
+    return -1;
   }
-  return -1;
+
 }
 
 /* Free the current process's resources. */
@@ -117,6 +128,11 @@ process_exit (void)
       cur->pagedir = NULL;
       pagedir_activate (NULL);
       pagedir_destroy (pd);
+
+      struct thread * parent = thread_get_by_tid(cur->parentId);
+      if(parent != NULL || parent != 0){
+        thread_unblock(parent);
+      }
     }
 }
 
@@ -526,7 +542,7 @@ setup_stack (void **esp, char ** arguments, int argc)
         *esp -= offset;
         arg_ptrs[i] = *esp;
         memcpy(*esp, arguments[i], offset);
-        printf("*ARGV[%d]:\t%s\t\t%p\n", i, (char*) *esp, *esp);
+        // printf("*ARGV[%d]:\t%s\t\t%p\n", i, (char*) *esp, *esp);
       }
       arg_ptrs[argc] = 0;
 
@@ -536,14 +552,14 @@ setup_stack (void **esp, char ** arguments, int argc)
       if (word_align > 0){
         *esp -= word_align;
         memcpy(*esp, &word_align, word_align);
-        printf("word-align:\t%d\t\t%p\n", *((char*) *esp), *esp);
+        // printf("word-align:\t%d\t\t%p\n", *((char*) *esp), *esp);
       }
       
       // add terminator to argv
       size_t offset = sizeof(char*);
       *esp -= offset;
       memcpy(*esp, &arg_ptrs[argc], offset);
-      printf("ARGV[%d]:\t%p\t\t%p\n", argc, *((char*) *esp), *esp);
+      // printf("ARGV[%d]:\t%p\t\t%p\n", argc, *((char*) *esp), *esp);
 
       // push arguments addresses into stack (argv)
       i = argc - 1;
@@ -551,23 +567,23 @@ setup_stack (void **esp, char ** arguments, int argc)
       {
         *esp -= offset;
         memcpy(*esp, &arg_ptrs[i], offset);
-        printf("ARGV[%d]:\t%p\t%p\n", i, *((char*) *esp), *esp);
+        // printf("ARGV[%d]:\t%p\t%p\n", i, *((char*) *esp), *esp);
       }
       // push argv itself
       char* temp = *esp;
       *esp -= offset;
       memcpy(*esp, &temp, offset);
-      printf("argv:\t\t%p\t%p\n", (*(char*)*esp), *esp);
+      // printf("argv:\t\t%p\t%p\n", (*(char*)*esp), *esp);
       // push argc
       *esp -= sizeof(int);
       memcpy(*esp, &argc, sizeof(int));
-      printf("argc:\t\t%d\t\t%p\n", *((char*) *esp), *esp);
+      // printf("argc:\t\t%d\t\t%p\n", *((char*) *esp), *esp);
 
       // push return address
       *esp -= sizeof(void*);
       char* retaddr = PHYS_BASE;
       memcpy(*esp, &retaddr, sizeof(void*));
-      printf("return:\t\t%p\t\t%p\n", *((char*) *esp), *esp);
+      // printf("return:\t\t%p\t\t%p\n", *((char*) *esp), *esp);
 
       // a
 		  // int chars_pushed = 0;

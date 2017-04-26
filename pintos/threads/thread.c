@@ -142,7 +142,7 @@ thread_start (void)
   /* Create the idle thread. */
   struct semaphore idle_started;
   sema_init (&idle_started, 0);
-  thread_create ("idle", PRI_MIN, idle, &idle_started);
+  thread_create ("idle", PRI_MIN, idle, &idle_started, 0);
 
   /* Start preemptive thread scheduling. */
   intr_enable ();
@@ -258,7 +258,7 @@ thread_print_stats (void)
    Priority scheduling is the goal of Problem 1-3. */
 tid_t
 thread_create (const char *name, int priority,
-               thread_func *function, void *aux) 
+               thread_func *function, void *aux, tid_t parent) 
 {
   struct thread *t;
   struct kernel_thread_frame *kf;
@@ -306,6 +306,10 @@ thread_create (const char *name, int priority,
   /* A new thread has just been created and is ready. */
   /* Maybe its priority is higher than the current one. */
   thread_yield_for_higher_priority();
+
+  #ifdef USERPROG
+  t->parentId = parent;
+  #endif
 
   return tid;
 }
