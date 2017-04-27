@@ -6,6 +6,9 @@
 
 static void syscall_handler (struct intr_frame *);
 void exit (int status);
+pid_t exec (const char *cmd_line);
+int wait (pid_t pid);
+
 
 void
 syscall_init (void) 
@@ -35,11 +38,16 @@ syscall_handler (struct intr_frame *f UNUSED)
   			exit(* (int *)(esp + 1));
   			break;
   		}
+    case SYS_WAIT:
+      // call wait() here
+      break;
+    case SYS_EXEC:
+      // call exec() here
+      break;
   	default:
   		break;
   }
 }
-
 
 void exit (int status)
 {
@@ -47,4 +55,12 @@ void exit (int status)
 
   printf ("%s: exit(%d)\n", strtok_r(cur->name, " "), status);
   thread_exit();
+}
+
+pid_t exec (const char *cmd_line){
+  return 0;
+}
+
+int wait (pid_t pid){
+  return 0;
 }
