@@ -5,6 +5,7 @@
 #include <list.h>
 #include <stdint.h>
 #include "threads/fpr_arith.h"
+#include "threads/synch.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -119,6 +120,8 @@ struct thread
 
     /* Used for userprof/process_wait */
     tid_t parentId;
+
+    struct semaphore exec_sema;
 
   };
 

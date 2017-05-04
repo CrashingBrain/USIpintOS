@@ -3,6 +3,7 @@
 #include <syscall-nr.h>
 #include "threads/interrupt.h"
 #include "threads/thread.h"
+#include <user/syscall.h>
 
 static void syscall_handler (struct intr_frame *);
 void exit (int status);
@@ -39,11 +40,15 @@ syscall_handler (struct intr_frame *f UNUSED)
   			break;
   		}
     case SYS_WAIT:
-      // call wait() here
-      break;
+      {
+        // call wait() here
+        break;
+      } 
     case SYS_EXEC:
-      // call exec() here
-      break;
+      {
+        f->eax = exec((char*) *(esp+1));
+        break;
+      }
   	default:
   		break;
   }
@@ -57,8 +62,16 @@ void exit (int status)
   thread_exit();
 }
 
-pid_t exec (const char *cmd_line){
-  return 0;
+pid_t exec (const char *cmd_line)
+{
+  pid_t pid = process_execute(cmd_line);
+  //TODO
+  // Use sempahore here to wait until the child process is fully created
+  // Check if creation was successful otherwise return -1
+  // Still need to initialize the semaphore in thread creation
+  // right now it's just placeholder
+  struct semaphore* sema = &(thread_current()->exec_sema);
+  return pid;
 }
 
 int wait (pid_t pid){
