@@ -41,8 +41,14 @@ process_execute (const char *file_name)
   /* Create a new thread to execute FILE_NAME. */
   struct thread *t = thread_current ();
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy, t->tid);
+
+
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy);
+  // TODO
+  // here wait with sema_down for child
+  // has to be in a 'else' of the above 'if'??
+  // if creation fails, parent will wait for none :'(
   return tid;
 }
 
@@ -62,6 +68,10 @@ start_process (void *file_name_)
   if_.eflags = FLAG_IF | FLAG_MBS;
   
   success = load (file_name, &if_.eip, &if_.esp);
+  // TODO
+  // here if success then set flag of child to success
+  // then call sema_up on parent waiting
+  
   struct thread * parent = thread_get_by_tid(thread_current()->parentId);
   sema_up(&(parent->exec_sema));
 

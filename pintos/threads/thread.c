@@ -304,10 +304,14 @@ thread_create (const char *name, int priority,
 
   intr_set_level (old_level);
   
-
+  // TODO
+  // here add thread t to children list
 
   /* Add to run queue. */
-  thread_unblock (t);
+  thread_unblock (t); 
+  
+  //this can not go here because it needs to stops itself,
+  // but doing so here will never yield in favor of the child
   sema_down(&(thread_current()->exec_sema));
 
   /* A new thread has just been created and is ready. */
@@ -675,6 +679,8 @@ init_thread (struct thread *t, const char *name, int priority)
   t->priority = priority;
 
   sema_init(&(t->exec_sema), 1);
+  // TODO
+  // here init the list for children
 
   /* Do the following in case the multilevel feedback queue scheduler
      is being used (i.e., it the option -mlfqs was passed to kernel). */

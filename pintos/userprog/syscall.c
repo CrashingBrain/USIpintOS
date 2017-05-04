@@ -66,11 +66,8 @@ pid_t exec (const char *cmd_line)
 {
   pid_t pid = process_execute(cmd_line);
   //TODO
-  // Use sempahore here to wait until the child process is fully created
   // Check if creation was successful otherwise return -1
-  // Still need to initialize the semaphore in thread creation
-  // right now it's just placeholder
-  struct semaphore* sema = &(thread_current()->exec_sema);
+
 
   if(pid == TID_ERROR){
     return -1;

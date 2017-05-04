@@ -131,6 +131,8 @@ struct thread
     struct list children;
 
     struct semaphore exec_sema;
+    // TODO
+    // here add a flag to see if thread loaded correctly
 
   };
 
