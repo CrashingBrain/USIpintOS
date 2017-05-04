@@ -64,10 +64,10 @@ void exit (int status)
 
 pid_t exec (const char *cmd_line)
 {
+  // check validity of pointer before delivering it to critical code, maybe?
   pid_t pid = process_execute(cmd_line);
   //TODO
   // Check if creation was successful otherwise return -1
-
 
   if(pid == TID_ERROR){
     return -1;
