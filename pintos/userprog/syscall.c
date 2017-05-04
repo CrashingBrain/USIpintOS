@@ -71,6 +71,10 @@ pid_t exec (const char *cmd_line)
   // Still need to initialize the semaphore in thread creation
   // right now it's just placeholder
   struct semaphore* sema = &(thread_current()->exec_sema);
+
+  if(pid == TID_ERROR){
+    return -1;
+  }
   return pid;
 }
 

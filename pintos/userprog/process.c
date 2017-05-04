@@ -62,6 +62,10 @@ start_process (void *file_name_)
   if_.eflags = FLAG_IF | FLAG_MBS;
   
   success = load (file_name, &if_.eip, &if_.esp);
+  
+  struct thread * parent = thread_get_by_tid(thread_current()->parentId);
+  sema_up(&(parent->exec_sema));
+
 
   /* If load failed, quit. */
   palloc_free_page (file_name);
