@@ -104,22 +104,6 @@ thread_get_by_tid (int tid) {
   return th;
 }
 
-thread_get_child_by_tid (int tid) {
-  struct thread * th = 0;
-  struct thread * cur = thread_current();
-
-  struct list_elem * it;
-  for (it  = list_begin(&(cur->children)) ;
-       it != list_end  (&(cur->children)) ;
-       it  = list_next (it))
-  {
-    struct thread * elth = list_entry(it, struct thread, elem);
-    if (elth->tid == tid) { th = elth; break; }
-  }
-
-  return th;
-}
-
 /* Initializes the threading system by transforming the code
    that's currently running into a thread.  This can't work in
    general and it is possible in this case only because loader.S
@@ -318,12 +302,8 @@ thread_create (const char *name, int priority,
   t->parentId = parent;
   #endif
 
-  list_push_back (&(thread_current()->children), &(t->elem));
-
-
-
   intr_set_level (old_level);
-
+  
 
 
   /* Add to run queue. */
