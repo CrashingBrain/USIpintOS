@@ -96,6 +96,9 @@ struct child_list_elem{
   struct list_elem elem;
   tid_t id;
   bool terminated;
+    // TODO
+    // here add a flag to see if thread loaded correctly
+  bool loadsuccess;
 };
 
 struct thread
@@ -131,8 +134,6 @@ struct thread
     struct list children;
 
     struct semaphore exec_sema;
-    // TODO
-    // here add a flag to see if thread loaded correctly
 
   };
 

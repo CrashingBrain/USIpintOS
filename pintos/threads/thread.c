@@ -12,6 +12,7 @@
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 #include "devices/timer.h"
+#include "threads/malloc.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -306,6 +307,12 @@ thread_create (const char *name, int priority,
   
   // TODO
   // here add thread t to children list
+  struct child_list_elem* childt = malloc(sizeof(struct child_list_elem));
+  childt->id = tid;
+  childt->terminated = false;
+  childt->loadsuccess = false;
+
+  list_push_back(&(thread_current()->children), childt);
 
   /* Add to run queue. */
   thread_unblock (t); 
@@ -678,9 +685,10 @@ init_thread (struct thread *t, const char *name, int priority)
 
   t->priority = priority;
 
-  sema_init(&(t->exec_sema), 1);
+  sema_init(&(t->exec_sema), 0);
   // TODO
   // here init the list for children
+  list_init(&(t->children));
 
   /* Do the following in case the multilevel feedback queue scheduler
      is being used (i.e., it the option -mlfqs was passed to kernel). */
