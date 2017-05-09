@@ -127,7 +127,7 @@ struct thread
 
     struct semaphore exec_sema;
     bool loadsuccess;
-    // bool terminated;
+    bool terminated;
     int exitstatus;
 
   };

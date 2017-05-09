@@ -61,6 +61,7 @@ void exit (int status)
 
   printf ("%s: exit(%d)\n", strtok_r(cur->name, " "), status);
   cur->exitstatus = status;
+  cur->terminated = true;
   thread_exit();
 }
 
@@ -84,7 +85,12 @@ int wait (pid_t pid){
       // printf("CAZZO SEI QUÀ?\n");
 
     return -1;
-  } 
+  } else {
+    while(!child->terminated){
+
+    }
+    return child->status;
+  }
 
 
   // printf("CAZZO status exitstatus %d\n", child->exitstatus);
