@@ -43,12 +43,15 @@ process_execute (const char *file_name)
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy, t->tid);
 
 
-  if (tid == TID_ERROR)
+  if (tid == TID_ERROR){
     palloc_free_page (fn_copy);
+  }else{
   // TODO
   // here wait with sema_down for child
   // has to be in a 'else' of the above 'if'??
   // if creation fails, parent will wait for none :'(
+    sema_down(&(t->exec_sema));
+  }
   return tid;
 }
 
@@ -71,8 +74,8 @@ start_process (void *file_name_)
   // TODO
   // here if success then set flag of child to success
   // then call sema_up on parent waiting
-  
   struct thread * parent = thread_get_by_tid(thread_current()->parentId);
+  thread_current()->loadsuccess = success;
   sema_up(&(parent->exec_sema));
 
 

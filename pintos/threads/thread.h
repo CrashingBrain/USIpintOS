@@ -94,7 +94,7 @@ typedef int tid_t;
 
 struct child_list_elem{
   struct list_elem elem;
-  tid_t id;
+  struct thread* current_child;
   bool terminated;
     // TODO
     // here add a flag to see if thread loaded correctly
@@ -134,6 +134,8 @@ struct thread
     struct list children;
 
     struct semaphore exec_sema;
+    bool loadsuccess;
+    bool terminated;
 
   };
 

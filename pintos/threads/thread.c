@@ -307,23 +307,21 @@ thread_create (const char *name, int priority,
   
   // TODO
   // here add thread t to children list
-  struct child_list_elem* childt = malloc(sizeof(struct child_list_elem));
-  childt->id = tid;
-  childt->terminated = false;
-  childt->loadsuccess = false;
 
-  list_push_back(&(thread_current()->children), childt);
+  // printf("CIAO CAZZONE\n");
+  list_push_back(&(thread_current()->children), &(t->elem));
 
   /* Add to run queue. */
   thread_unblock (t); 
   
   //this can not go here because it needs to stops itself,
   // but doing so here will never yield in favor of the child
-  sema_down(&(thread_current()->exec_sema));
-
+  // sema_down(&(thread_current()->exec_sema));
+  // printf("CIAO MI È PIACIUTO IL TUO CAZZONE\n");
   /* A new thread has just been created and is ready. */
   /* Maybe its priority is higher than the current one. */
   thread_yield_for_higher_priority();
+  // printf("MMMMHHH CAZZOOO\n");
 
   
 
