@@ -69,12 +69,19 @@ pid_t exec (const char *cmd_line)
   //TODO
   // Check if creation was successful otherwise return -1
 
-  if(pid == TID_ERROR){
-    return -1;
-  }
   return pid;
 }
 
 int wait (pid_t pid){
+
+  struct thread * child = thread_get_children_by_tid(pid);
+  if(child == NULL) {
+    return -1;
+  } else if(child->status == THREAD_DYING){
+    return -1;
+  } 
+
+
+
   return 0;
 }

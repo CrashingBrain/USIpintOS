@@ -105,6 +105,22 @@ thread_get_by_tid (int tid) {
   return th;
 }
 
+struct thread *
+thread_get_children_by_tid (int tid) {
+  struct thread * th = NULL;
+
+  struct list_elem * it;
+  for (it  = list_begin(&(thread_current()->children)) ;
+       it != list_end  (&(thread_current()->children)) ;
+       it  = list_next (it))
+  {
+    struct thread * elth = list_entry(it, struct thread, allelem);
+    if (elth->tid == tid) { th = elth; break; }
+  }
+
+  return th;
+}
+
 /* Initializes the threading system by transforming the code
    that's currently running into a thread.  This can't work in
    general and it is possible in this case only because loader.S
@@ -307,22 +323,17 @@ thread_create (const char *name, int priority,
   
   // TODO
   // here add thread t to children list
-
-  // printf("CIAO CAZZONE\n");
   list_push_back(&(thread_current()->children), &(t->elem));
 
   /* Add to run queue. */
   thread_unblock (t); 
   
-  //this can not go here because it needs to stops itself,
+  // this can not go here because it needs to stops itself,
   // but doing so here will never yield in favor of the child
   // sema_down(&(thread_current()->exec_sema));
-  // printf("CIAO MI È PIACIUTO IL TUO CAZZONE\n");
   /* A new thread has just been created and is ready. */
   /* Maybe its priority is higher than the current one. */
   thread_yield_for_higher_priority();
-  // printf("MMMMHHH CAZZOOO\n");
-
   
 
   return tid;
