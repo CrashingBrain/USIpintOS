@@ -175,7 +175,7 @@ int thread_get_load_avg (void);
 
 void thread_sleep (int64_t wakeup_at);
 
-bool thread_priority_cmp (const struct list_elem* a, 
+bool thread_priority_cmp (const struct list_elem* a,
   const struct list_elem* b,
   void* aux);
 

@@ -68,7 +68,7 @@ start_process (void *file_name_)
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
-  
+
   success = load (file_name, &if_.eip, &if_.esp);
   // TODO
   // here if success then set flag of child to success
@@ -105,6 +105,26 @@ start_process (void *file_name_)
 int
 process_wait (tid_t child_tid)
 {
+	struct thread * child = thread_get_children_by_tid(child_tid);
+  if(child == NULL) {
+      // printf("%d CAZZO SEI QUI?\n", pid);
+    return -1;
+  } else if(child->status == THREAD_DYING){
+      // printf("CAZZO SEI QUÀ?\n");
+
+    return -1;
+  } else {
+	    // enum intr_level old_lvl = intr_disable ();
+	    // thread_block();
+			sema_down(&thread_current()->exec_sema);
+	    // intr_set_level (old_lvl);
+
+	    return 0;
+
+  }
+
+  return child->exitstatus;
+	/*
   struct thread * child = thread_get_by_tid(child_tid);
   struct thread * current = thread_current();
 
@@ -117,7 +137,7 @@ process_wait (tid_t child_tid)
 
   } else{
     return -1;
-  }
+  }*/
 
 }
 
@@ -146,7 +166,7 @@ process_exit (void)
 
       struct thread * parent = thread_get_by_tid(cur->parentId);
       if(parent != NULL || parent != 0){
-        thread_unblock(parent);
+        sema_up(&parent->exec_sema);
       }
     }
 }
@@ -266,7 +286,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
   file_name = strtok_r(file_name, " ", &arguments);
   char* fields[ARGV_MAX_SIZE];
   int words =0;
-  
+
   char *arg = (char *) file_name;
   for ( ; arg != NULL ; arg = strtok_r (NULL, " ", &arguments))
     {
@@ -515,7 +535,7 @@ setup_stack (void **esp, char ** arguments, int argc)
         memcpy(*esp, &word_align, word_align);
         // printf("word-align:\t%d\t\t%p\n", *((char*) *esp), *esp);
       }
-      
+
       // add terminator to argv
       size_t offset = sizeof(char*);
       *esp -= offset;
