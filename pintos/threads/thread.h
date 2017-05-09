@@ -92,14 +92,6 @@ typedef int tid_t;
    ready state is on the run queue, whereas only a thread in the
    blocked state is on a semaphore wait list. */
 
-struct child_list_elem{
-  struct list_elem elem;
-  struct thread* current_child;
-  bool terminated;
-    // TODO
-    // here add a flag to see if thread loaded correctly
-  bool loadsuccess;
-};
 
 struct thread
   {
@@ -135,7 +127,8 @@ struct thread
 
     struct semaphore exec_sema;
     bool loadsuccess;
-    bool terminated;
+    // bool terminated;
+    int exitstatus;
 
   };
 
@@ -145,6 +138,8 @@ struct thread
 extern bool thread_mlfqs;
 
 struct thread * thread_get_by_tid (int tid);
+struct thread * thread_get_children_by_tid (int tid);
+
 
 void thread_init (void);
 void thread_start (void);

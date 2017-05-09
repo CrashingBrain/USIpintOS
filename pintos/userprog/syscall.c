@@ -42,6 +42,7 @@ syscall_handler (struct intr_frame *f UNUSED)
     case SYS_WAIT:
       {
         // call wait() here
+        f->eax = wait(* (int *)(esp + 1));
         break;
       } 
     case SYS_EXEC:
@@ -59,6 +60,7 @@ void exit (int status)
   struct thread *cur = thread_current();
 
   printf ("%s: exit(%d)\n", strtok_r(cur->name, " "), status);
+  cur->exitstatus = status;
   thread_exit();
 }
 
@@ -76,12 +78,15 @@ int wait (pid_t pid){
 
   struct thread * child = thread_get_children_by_tid(pid);
   if(child == NULL) {
+      // printf("%d CAZZO SEI QUI?\n", pid);
     return -1;
   } else if(child->status == THREAD_DYING){
+      // printf("CAZZO SEI QUÀ?\n");
+
     return -1;
   } 
 
 
-
-  return 0;
+  // printf("CAZZO status exitstatus %d\n", child->exitstatus);
+  return child->exitstatus;
 }

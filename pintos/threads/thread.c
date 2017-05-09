@@ -108,13 +108,14 @@ thread_get_by_tid (int tid) {
 struct thread *
 thread_get_children_by_tid (int tid) {
   struct thread * th = NULL;
+  struct list children = thread_current()->children;
 
   struct list_elem * it;
-  for (it  = list_begin(&(thread_current()->children)) ;
-       it != list_end  (&(thread_current()->children)) ;
+  for (it  = list_begin(&children) ;
+       it != list_end  (&children) ;
        it  = list_next (it))
   {
-    struct thread * elth = list_entry(it, struct thread, allelem);
+    struct thread * elth = list_entry(it, struct thread, elem);
     if (elth->tid == tid) { th = elth; break; }
   }
 
@@ -324,6 +325,18 @@ thread_create (const char *name, int priority,
   // TODO
   // here add thread t to children list
   list_push_back(&(thread_current()->children), &(t->elem));
+  // struct thread * th = NULL;
+  // struct list children = thread_current()->children;
+
+  // printf("Printing children: %d\n", elth->tid)
+  // struct list_elem * it;
+  // for (it  = list_begin(&children) ;
+  //      it != list_end  (&children) ;
+  //      it  = list_next (it))
+  // {
+  //   struct thread * elth = list_entry(it, struct thread, allelem);
+  //   printf("children ID: %d\n", elth->tid)
+  // }
 
   /* Add to run queue. */
   thread_unblock (t); 
