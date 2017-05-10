@@ -38,20 +38,24 @@ syscall_handler (struct intr_frame *f UNUSED)
   	case SYS_EXIT: //first to do
   		{
         // printf("status: %d %d\n", * (int *) esp, * (int *)(esp + 1));
-        bad_ptr((const void *)(esp + 1));
+        // bad_ptr((const void *)(esp + 1));
   			exit(* (int *)(esp + 1));
   			break;
   		}
     case SYS_WAIT:
       {
         // call wait() here
-        bad_ptr((int *)(esp + 1));
+        // bad_ptr((int *)(esp + 1));
         f->eax = wait(* (int *)(esp + 1));
         break;
       }
     case SYS_EXEC:
       {
-        f->eax = exec((char*) *(esp+1));
+				if (is_user_vaddr(*(esp+1)) &&  pagedir_get_page(thread_current()->pagedir, *(esp+1))){
+					f->eax = exec((char*) *(esp+1));
+				} else{
+					exit(-1);
+				}
         break;
       }
   	default:
@@ -59,13 +63,13 @@ syscall_handler (struct intr_frame *f UNUSED)
   }
 }
 
-void bad_ptr (const void *ptr)
-{
-  if (!is_user_vaddr(ptr) || ptr < ((void *) 0x08048000) || !lookup_page(thread_current()->pagedir, ptr, false))
-    {
-      exit(-1);
-    }
-}
+// void bad_ptr (const void *ptr)
+// {
+//   if (is_user_vaddr(ptr) &&  pagedir_get_page(thread_current()->pagedir, ptr))
+//     {
+//       exit(-1);
+//     }
+// }
 
 void exit (int status)
 {
