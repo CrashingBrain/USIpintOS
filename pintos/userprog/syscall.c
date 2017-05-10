@@ -4,6 +4,7 @@
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+#include "userprog/pagedir.h"
 #include <user/syscall.h>
 
 static void syscall_handler (struct intr_frame *);
@@ -60,7 +61,7 @@ syscall_handler (struct intr_frame *f UNUSED)
 
 void bad_ptr (const void *ptr)
 {
-  if (!is_user_vaddr(ptr) || ptr < ((void *) 0x08048000))
+  if (!is_user_vaddr(ptr) || ptr < ((void *) 0x08048000) || !lookup_page(thread_current()->pagedir, ptr, false))
     {
       exit(-1);
     }
