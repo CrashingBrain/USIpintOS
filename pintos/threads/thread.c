@@ -107,7 +107,8 @@ thread_get_by_tid (int tid) {
 
 struct thread *
 thread_get_children_by_tid (int tid) {
-  struct thread * th = NULL;
+	// printf("CAZZONE CHE CHIAMA: %s\n", thread_current()->name);
+  struct thread * th = 0;
   struct list children = thread_current()->children;
 
   struct list_elem * it;
@@ -115,7 +116,8 @@ thread_get_children_by_tid (int tid) {
        it != list_end  (&children) ;
        it  = list_next (it))
   {
-    struct thread * elth = list_entry(it, struct thread, elem);
+    struct thread * elth = list_entry(it, struct thread, test);
+		// printf("CAZZONE CHILD: %s\n", elth->name);
     if (elth->tid == tid) { th = elth; break; }
   }
 
@@ -150,6 +152,7 @@ thread_init (void)
   init_thread (initial_thread, "main", PRI_DEFAULT);
   initial_thread->status = THREAD_RUNNING;
   initial_thread->tid = allocate_tid ();
+	list_init(&initial_thread->children);
 }
 
 /* Starts preemptive thread scheduling by enabling interrupts.
@@ -324,7 +327,7 @@ thread_create (const char *name, int priority,
 
   // TODO
   // here add thread t to children list
-  list_push_back(&(thread_current()->children), &(t->elem));
+  list_push_back(&(thread_current()->children), &(t->test));
   // struct thread * th = NULL;
   // struct list children = thread_current()->children;
 
