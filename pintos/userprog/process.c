@@ -113,13 +113,15 @@ process_wait (tid_t child_tid)
       // printf("CAZZO SEI QUÀ?\n");
 
     return -1;
-  } else {
+  } else if(child->terminated){
+		return -1;
+	}else {
 	    // enum intr_level old_lvl = intr_disable ();
 	    // thread_block();
 			sema_down(&thread_current()->exec_sema);
 	    // intr_set_level (old_lvl);
 
-	    return 0;
+	    return child->exitstatus;
 
   }
 
@@ -164,10 +166,10 @@ process_exit (void)
       pagedir_activate (NULL);
       pagedir_destroy (pd);
 
-      struct thread * parent = thread_get_by_tid(cur->parentId);
-      if(parent != NULL || parent != 0){
-        sema_up(&parent->exec_sema);
-      }
+      // struct thread * parent = thread_get_by_tid(cur->parentId);
+      // if(parent != NULL || parent != 0){
+      //   sema_up(&parent->exec_sema);
+      // }
     }
 }
 

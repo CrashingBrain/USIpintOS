@@ -62,6 +62,11 @@ void exit (int status)
   printf ("%s: exit(%d)\n", strtok_r(cur->name, " "), status);
   cur->exitstatus = status;
   cur->terminated = true;
+
+	struct thread * parent = thread_get_by_tid(cur->parentId);
+	if(parent != NULL || parent != 0){
+		sema_up(&parent->exec_sema);
+	}
   thread_exit();
 }
 
