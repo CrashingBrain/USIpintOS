@@ -111,10 +111,8 @@ process_wait (tid_t child_tid)
 {
 	struct thread * child = thread_get_by_tid(child_tid);
   if(child == NULL) {
-      // printf("%d CAZZO SEI QUI?\n", pid);
     return -1;
   } else if(child->status == THREAD_DYING){
-      // printf("CAZZO SEI QUÀ?\n");
 
     return -1;
   } else if(child->terminated){
