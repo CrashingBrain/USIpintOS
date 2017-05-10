@@ -50,6 +50,8 @@ process_execute (const char *file_name)
   // has to be in a 'else' of the above 'if'??
   // if creation fails, parent will wait for none :'(
     sema_down(&(t->exec_sema));
+		struct thread * child = thread_get_by_tid(tid);
+		if(!child->loadsuccess) return -1;
   }
   return tid;
 }
@@ -80,8 +82,10 @@ start_process (void *file_name_)
 
   /* If load failed, quit. */
   palloc_free_page (file_name);
-  if (!success)
-    thread_exit ();
+  if (!success){
+		thread_current()->tid = -1;
+		thread_exit ();
+	}
 
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
