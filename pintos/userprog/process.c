@@ -155,6 +155,10 @@ process_exit (void)
   pd = cur->pagedir;
   if (pd != NULL)
     {
+			struct thread * parent = thread_get_by_tid(cur->parentId);
+			if(parent != NULL || parent != 0){
+			  sema_up(&parent->exec_sema);
+			}
       /* Correct ordering here is crucial.  We must set
          cur->pagedir to NULL before switching page directories,
          so that a timer interrupt can't switch back to the
@@ -166,10 +170,7 @@ process_exit (void)
       pagedir_activate (NULL);
       pagedir_destroy (pd);
 
-      // struct thread * parent = thread_get_by_tid(cur->parentId);
-      // if(parent != NULL || parent != 0){
-      //   sema_up(&parent->exec_sema);
-      // }
+
     }
 }
 

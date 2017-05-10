@@ -63,10 +63,10 @@ void exit (int status)
   cur->exitstatus = status;
   cur->terminated = true;
 
-	struct thread * parent = thread_get_by_tid(cur->parentId);
-	if(parent != NULL || parent != 0){
-		sema_up(&parent->exec_sema);
-	}
+	// struct thread * parent = thread_get_by_tid(cur->parentId);
+	// if(parent != NULL || parent != 0){
+	// 	sema_up(&parent->exec_sema);
+	// }
   thread_exit();
 }
 
