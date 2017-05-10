@@ -3,6 +3,7 @@
 #include <syscall-nr.h>
 #include "threads/interrupt.h"
 #include "threads/thread.h"
+#include "threads/vaddr.h"
 #include <user/syscall.h>
 
 static void syscall_handler (struct intr_frame *);
@@ -36,12 +37,14 @@ syscall_handler (struct intr_frame *f UNUSED)
   	case SYS_EXIT: //first to do
   		{
         // printf("status: %d %d\n", * (int *) esp, * (int *)(esp + 1));
+        bad_ptr((const void *)(esp + 1));
   			exit(* (int *)(esp + 1));
   			break;
   		}
     case SYS_WAIT:
       {
         // call wait() here
+        bad_ptr((int *)(esp + 1));
         f->eax = wait(* (int *)(esp + 1));
         break;
       }
@@ -53,6 +56,14 @@ syscall_handler (struct intr_frame *f UNUSED)
   	default:
   		break;
   }
+}
+
+void bad_ptr (const void *ptr)
+{
+  if (!is_user_vaddr(ptr) || ptr < ((void *) 0x08048000))
+    {
+      exit(-1);
+    }
 }
 
 void exit (int status)
