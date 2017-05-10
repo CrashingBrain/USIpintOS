@@ -105,6 +105,9 @@ struct thread
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. Used either for ready_list or sleeping_list. */
 
+		struct list_elem test;              /* List element. Used either for ready_list or sleeping_list. */
+
+
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t * pagedir;                 /* Page directory. */

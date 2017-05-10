@@ -109,7 +109,7 @@ start_process (void *file_name_)
 int
 process_wait (tid_t child_tid)
 {
-	struct thread * child = thread_get_children_by_tid(child_tid);
+	struct thread * child = thread_get_by_tid(child_tid);
   if(child == NULL) {
       // printf("%d CAZZO SEI QUI?\n", pid);
     return -1;
@@ -125,6 +125,7 @@ process_wait (tid_t child_tid)
 			sema_down(&thread_current()->exec_sema);
 	    // intr_set_level (old_lvl);
 
+			list_remove(&(child->test));
 	    return child->exitstatus;
 
   }
