@@ -91,8 +91,6 @@ typedef int tid_t;
    only because they are mutually exclusive: only a thread in the
    ready state is on the run queue, whereas only a thread in the
    blocked state is on a semaphore wait list. */
-
-
 struct thread
   {
     /* Owned by thread.c. */
@@ -105,12 +103,14 @@ struct thread
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. Used either for ready_list or sleeping_list. */
 
-		struct list_elem test;              /* List element. Used either for ready_list or sleeping_list. */
-
-
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t * pagedir;                 /* Page directory. */
+    int exit_status;                    /* Status passed to exit() */
+    struct list children_data;          /* List of children of this thread; stays after children finish. */
+    struct semaphore sem_child_loaded; /* Makes this thread block when creating a new child, which unblocks it. */
+    bool child_load_error;            /* Used for the child to inform its parent about creation. */
+    struct thread* parent;              /* Parent thread */
 #endif
 
     int64_t wakeup_at_tick;
@@ -122,18 +122,23 @@ struct thread
     int priority;                       /* Priority. */
     int nice;                           /* Niceness value. */
     FPReal recent_cpu;                  /* Recent cpu usage of the thread. */
-
-    /* Used for userprof/process_wait */
-    tid_t parentId;
-
-    struct list children;
-
-    struct semaphore exec_sema;
-    bool loadsuccess;
-    bool terminated;
-    int exitstatus;
-
   };
+
+/* Used for the wait(tid) system call. The parent must keep track of the
+ * threads that it has created, so that it can return their correct exit
+ * status, even after they've finished. The child_thread item can be
+ * removed only after the thread has been waited for.
+ *    The alternative for this would be to assume that a thread only waits
+ * its last child, which is not part of the specification. */
+struct child_thread_data {
+    struct thread * thread_ref;
+    tid_t tid;
+    int exit_status;
+    struct semaphore sem_exited;
+    struct list_elem elem;
+};
+
+struct child_thread_data * thread_get_child_data(struct thread * parent, tid_t child_tid);
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
@@ -141,8 +146,6 @@ struct thread
 extern bool thread_mlfqs;
 
 struct thread * thread_get_by_tid (int tid);
-struct thread * thread_get_children_by_tid (int tid);
-
 
 void thread_init (void);
 void thread_start (void);
@@ -151,7 +154,7 @@ void thread_tick (void);
 void thread_print_stats (void);
 
 typedef void thread_func (void *aux);
-tid_t thread_create (const char *name, int priority, thread_func *, void *, tid_t parent);
+tid_t thread_create (const char *name, int priority, thread_func *, void *);
 
 void thread_block (void);
 void thread_unblock (struct thread *);
@@ -165,7 +168,7 @@ void thread_yield (void);
 void thread_yield_on_higher_priority (void);
 
 /* Performs some operation on thread t, given auxiliary data AUX. */
-typedef void thread_action_func (struct thread *t, void *aux);
+typedef void thread_action_func (struct thread *thread_ref, void *aux);
 void thread_foreach (thread_action_func *, void *);
 
 int thread_get_priority (void);
@@ -178,7 +181,7 @@ int thread_get_load_avg (void);
 
 void thread_sleep (int64_t wakeup_at);
 
-bool thread_priority_cmp (const struct list_elem* a,
+bool thread_priority_cmp (const struct list_elem* a, 
   const struct list_elem* b,
   void* aux);
 

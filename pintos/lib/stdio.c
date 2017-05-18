@@ -4,6 +4,7 @@
 #include <round.h>
 #include <stdint.h>
 #include <string.h>
+#include "lib/stdbool.h"
 
 /* Auxiliary data for vsnprintf_helper(). */
 struct vsnprintf_aux 
