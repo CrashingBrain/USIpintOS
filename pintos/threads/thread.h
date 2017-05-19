@@ -106,7 +106,8 @@ struct thread
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. Used either for ready_list or sleeping_list. */
 
-		// struct hash file_table;
+    /* needed for file syscalls*/
+		struct hash file_table;
 
 
 #ifdef USERPROG

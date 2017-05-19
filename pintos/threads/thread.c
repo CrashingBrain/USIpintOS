@@ -742,7 +742,7 @@ init_thread (struct thread *t, const char *name, int priority)
 #endif
 
   t->stack = (uint8_t *) t + PGSIZE;
-
+  /* Initialize hashtable for storage of filepointers list */
 	// hash_init(&(t->file_table), hash_int, item_compare, NULL);
 
 

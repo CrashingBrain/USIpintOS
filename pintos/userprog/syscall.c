@@ -6,6 +6,8 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 #include "threads/palloc.h"
+#include "filesys/filesys.h"
+#include "filesys/file.h"
 #include "userprog/process.h"
 #include "devices/shutdown.h"
 
@@ -77,8 +79,13 @@ syscall_open (struct intr_frame *f)
 {
   int *stack = f->esp;
 	char * name = (char *) *(stack + 1);
-
-	f->eax = filesys_open (name);
+  struct file* filepointer = filesys_open(name);
+  // take filepointer
+  // generate a fd (we use timer tick)
+  // put fd into a hashtable
+  // store in another table the <hash(fd), filepointer>
+  // return fd
+	f->eax = -1;
 }
 
 static void
