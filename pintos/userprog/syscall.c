@@ -17,6 +17,7 @@ static void syscall_exec (struct intr_frame *);
 static void syscall_wait (struct intr_frame *);
 static void syscall_write (struct intr_frame *);
 static void syscall_halt (struct intr_frame *);
+static void syscall_create (struct intr_frame *f);
 static bool check_user_address (void *);
 
 #define SYSCALL_MAX_CODE 19
@@ -37,6 +38,7 @@ syscall_init (void)
   call[SYS_WAIT]  = syscall_wait;   /* Wait for a child process to die. */
   call[SYS_WRITE] = syscall_write;  /* Write to a file. */
 	call[SYS_HALT] = syscall_halt;	/* Halts pintOS. */
+	call[SYS_CREATE] = syscall_create; /* Creates a new file. */
 }
 
 static void
@@ -54,6 +56,15 @@ syscall_exit (struct intr_frame *f)
   t->exit_status = *(stack+1);
   thread_get_child_data(t->parent, t->tid)->exit_status = t->exit_status;
   thread_exit ();
+}
+
+static void
+syscall_create (struct intr_frame *f)
+{
+  int *stack = f->esp;
+	char * name = (char *) *(stack + 1);
+	unsigned size = (unsigned) *(stack + 2);
+	f->eax = filesys_create (name, size);
 }
 
 static void
