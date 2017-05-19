@@ -18,6 +18,8 @@ static void syscall_wait (struct intr_frame *);
 static void syscall_write (struct intr_frame *);
 static void syscall_halt (struct intr_frame *);
 static void syscall_create (struct intr_frame *f);
+static void syscall_remove (struct intr_frame *f);
+static void syscall_open (struct intr_frame *f);
 static bool check_user_address (void *);
 
 #define SYSCALL_MAX_CODE 19
@@ -39,6 +41,8 @@ syscall_init (void)
   call[SYS_WRITE] = syscall_write;  /* Write to a file. */
 	call[SYS_HALT] = syscall_halt;	/* Halts pintOS. */
 	call[SYS_CREATE] = syscall_create; /* Creates a new file. */
+	call[SYS_REMOVE] = syscall_remove; /* Removes a file. */
+	call[SYS_OPEN] = syscall_open; /* Opens a file. */
 }
 
 static void
@@ -64,7 +68,26 @@ syscall_create (struct intr_frame *f)
   int *stack = f->esp;
 	char * name = (char *) *(stack + 1);
 	unsigned size = (unsigned) *(stack + 2);
+
 	f->eax = filesys_create (name, size);
+}
+
+static void
+syscall_open (struct intr_frame *f)
+{
+  int *stack = f->esp;
+	char * name = (char *) *(stack + 1);
+
+	f->eax = filesys_open (name);
+}
+
+static void
+syscall_remove (struct intr_frame *f)
+{
+  int *stack = f->esp;
+	char * name = (char *) *(stack + 1);
+
+	f->eax = filesys_remove (name);
 }
 
 static void

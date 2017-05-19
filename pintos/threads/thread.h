@@ -6,6 +6,9 @@
 #include <stdint.h>
 #include "threads/fpr_arith.h"
 #include "threads/synch.h"
+#include <kernel/hash.h>
+#include "filesys/filesys.h"
+
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -103,6 +106,9 @@ struct thread
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. Used either for ready_list or sleeping_list. */
 
+		// struct hash file_table;
+
+
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t * pagedir;                 /* Page directory. */
@@ -181,7 +187,7 @@ int thread_get_load_avg (void);
 
 void thread_sleep (int64_t wakeup_at);
 
-bool thread_priority_cmp (const struct list_elem* a, 
+bool thread_priority_cmp (const struct list_elem* a,
   const struct list_elem* b,
   void* aux);
 

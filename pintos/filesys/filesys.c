@@ -6,16 +6,24 @@
 #include "filesys/free-map.h"
 #include "filesys/inode.h"
 #include "filesys/directory.h"
+#include "devices/timer.h"
+#include "threads/malloc.h"
+#include "threads/thread.h"
 
 /* Partition that contains the file system. */
 struct block *fs_device;
 
 static void do_format (void);
 
+struct fd {
+	int id;
+	struct hash_elem element;
+};
+
 /* Initializes the file system module.
    If FORMAT is true, reformats the file system. */
 void
-filesys_init (bool format) 
+filesys_init (bool format)
 {
   fs_device = block_get_role (BLOCK_FILESYS);
   if (fs_device == NULL)
@@ -24,7 +32,7 @@ filesys_init (bool format)
   inode_init ();
   free_map_init ();
 
-  if (format) 
+  if (format)
     do_format ();
 
   free_map_open ();
@@ -33,7 +41,7 @@ filesys_init (bool format)
 /* Shuts down the file system module, writing any unwritten data
    to disk. */
 void
-filesys_done (void) 
+filesys_done (void)
 {
   free_map_close ();
 }
@@ -43,7 +51,7 @@ filesys_done (void)
    Fails if a file named NAME already exists,
    or if internal memory allocation fails. */
 bool
-filesys_create (const char *name, off_t initial_size) 
+filesys_create (const char *name, off_t initial_size)
 {
   block_sector_t inode_sector = 0;
   struct dir *dir = dir_open_root ();
@@ -51,7 +59,7 @@ filesys_create (const char *name, off_t initial_size)
                   && free_map_allocate (1, &inode_sector)
                   && inode_create (inode_sector, initial_size)
                   && dir_add (dir, name, inode_sector));
-  if (!success && inode_sector != 0) 
+  if (!success && inode_sector != 0)
     free_map_release (inode_sector, 1);
   dir_close (dir);
 
@@ -73,7 +81,21 @@ filesys_open (const char *name)
     dir_lookup (dir, name, &inode);
   dir_close (dir);
 
-  return file_open (inode);
+  struct file * fp = file_open (inode);
+	if(fp != NULL){
+		//generate fd, store fd-fp into table from 2
+
+		// struct fd * file_desc = malloc(sizeof(struct fd));
+		// file_desc->id = timer_ticks();
+		//
+		// struct thread * current = thread_current();
+
+		// hash_insert(&(current->file_table), &file_desc->element);
+		return fp;
+
+	} else {
+		return NULL;
+	}
 }
 
 /* Deletes the file named NAME.
@@ -81,11 +103,11 @@ filesys_open (const char *name)
    Fails if no file named NAME exists,
    or if an internal memory allocation fails. */
 bool
-filesys_remove (const char *name) 
+filesys_remove (const char *name)
 {
   struct dir *dir = dir_open_root ();
   bool success = dir != NULL && dir_remove (dir, name);
-  dir_close (dir); 
+  dir_close (dir);
 
   return success;
 }
@@ -100,4 +122,11 @@ do_format (void)
     PANIC ("root directory creation failed");
   free_map_close ();
   printf ("done.\n");
+}
+
+bool item_compare(const struct hash_elem * a, const struct hash_elem * b){
+	struct fd * fa = hash_entry(a, struct fd, element);
+	struct fd * fb = hash_entry(b, struct fd, element);
+
+	return fa->id > fb->id;
 }
