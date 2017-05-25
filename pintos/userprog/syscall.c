@@ -71,7 +71,18 @@ syscall_create (struct intr_frame *f)
 	char * name = (char *) *(stack + 1);
 	unsigned size = (unsigned) *(stack + 2);
 
-	f->eax = filesys_create (name, size);
+  if (check_user_address (name))
+  {
+    bool result = filesys_create (name, size);
+    // printf("CAZZO CREATE %s %u RESULT: %d\n", name, size, result);
+    f->eax = result;
+  }
+  else
+  {
+    // printf("CAZZO %s %u\n", name, size);
+    *(stack+1) = -1;
+    syscall_exit(f);
+  }
 }
 
 static void
