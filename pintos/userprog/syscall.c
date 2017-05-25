@@ -80,6 +80,18 @@ syscall_open (struct intr_frame *f)
   int *stack = f->esp;
 	char * name = (char *) *(stack + 1);
   struct file* filepointer = filesys_open(name);
+
+
+	struct file_descriptor *descriptor = malloc (sizeof (struct file_descriptor));
+    if (!descriptor)
+      syscall_exit (-1);
+
+			struct thread * current = thread_current();
+
+    descriptor->fd = timer_ticks();
+    descriptor->file = filepointer;
+
+    hash_insert (&current->fd_table, &descriptor->h_elem);
   // take filepointer
   // generate a fd (we use timer tick)
   // put fd into a hashtable

@@ -168,7 +168,6 @@ thread_init (void)
   initial_thread->tid = allocate_tid ();
 
 
-
 #ifdef USERPROG
   list_init(&initial_thread->children_data);
   initial_thread->parent = NULL;
@@ -876,6 +875,31 @@ allocate_tid (void)
   lock_release (&tid_lock);
 
   return tid;
+}
+
+
+
+unsigned
+file_descriptor_table_hash_function (const struct hash_elem *e, void *aux UNUSED)
+{
+  struct file_descriptor *descriptor =  hash_entry (e, struct file_descriptor, h_elem);
+
+  return descriptor->fd;
+}
+
+bool
+file_descriptor_table_less_func (const struct hash_elem *a,
+                           const struct hash_elem *b,
+                           void *aux UNUSED)
+{
+  struct file_descriptor *descriptor_a =  hash_entry (a,
+                                                      struct file_descriptor,
+                                                      h_elem);
+  struct file_descriptor *descriptor_b =  hash_entry (b,
+                                                      struct file_descriptor,
+                                                      h_elem);
+
+  return descriptor_a->fd < descriptor_b->fd;
 }
 
 
