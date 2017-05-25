@@ -161,6 +161,8 @@ thread_init (void)
   list_init (&all_list);
 
 
+
+
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
   init_thread (initial_thread, "main", PRI_DEFAULT);
@@ -878,28 +880,21 @@ allocate_tid (void)
 }
 
 
-
-unsigned
-file_descriptor_table_hash_function (const struct hash_elem *e, void *aux UNUSED)
-{
-  struct file_descriptor *descriptor =  hash_entry (e, struct file_descriptor, h_elem);
-
+//this function returns the fd associated to a certain hash element
+unsigned fd_hash_function (const struct hash_elem *e,
+												 void *aux UNUSED){
+  struct file_descriptor * descriptor =  hash_entry (e, struct file_descriptor, h_elem);
   return descriptor->fd;
 }
 
-bool
-file_descriptor_table_less_func (const struct hash_elem *a,
-                           const struct hash_elem *b,
-                           void *aux UNUSED)
-{
-  struct file_descriptor *descriptor_a =  hash_entry (a,
-                                                      struct file_descriptor,
-                                                      h_elem);
-  struct file_descriptor *descriptor_b =  hash_entry (b,
-                                                      struct file_descriptor,
-                                                      h_elem);
+//this function return the lesser fd of file descriptors
+bool fd_less_function (const struct hash_elem *a,
+                     const struct hash_elem *b,
+                     void *aux UNUSED){
+  struct file_descriptor *d_a =  hash_entry (a, struct file_descriptor, h_elem);
+  struct file_descriptor *d_b =  hash_entry (b, struct file_descriptor, h_elem);
 
-  return descriptor_a->fd < descriptor_b->fd;
+  return d_a->fd < d_b->fd;
 }
 
 

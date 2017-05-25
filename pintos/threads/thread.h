@@ -193,7 +193,7 @@ bool thread_priority_cmp (const struct list_elem* a,
   void* aux);
 
 
-bool file_descriptor_table_less_func (const struct hash_elem *a, const struct hash_elem *b, void *aux UNUSED);
-unsigned file_descriptor_table_hash_function (const struct hash_elem *e, void *aux UNUSED);
+bool fd_less_function (const struct hash_elem *a, const struct hash_elem *b, void *aux UNUSED);
+unsigned fd_hash_function (const struct hash_elem *e, void *aux UNUSED);
 
 #endif /* threads/thread.h */

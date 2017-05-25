@@ -12,6 +12,7 @@
 #include "filesys/file.h"
 #include "filesys/filesys.h"
 #include "threads/flags.h"
+#include "threads/thread.h"
 #include "threads/init.h"
 #include "threads/interrupt.h"
 #include "threads/palloc.h"
@@ -95,10 +96,10 @@ process_execute (const char * command)
   struct thread * cur = thread_current();
 
 
-		hash_init(&cur->fd_table,
-			&file_descriptor_table_hash_function,
-			&file_descriptor_table_less_func,
-			NULL);
+	hash_init(&cur->fd_table,
+		&fd_hash_function,
+		&fd_less_function,
+		NULL);
 
   /* Make a copy of COMMAND.
      Otherwise there's a race between the caller and load(). */

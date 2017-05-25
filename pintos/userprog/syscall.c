@@ -13,6 +13,8 @@
 
 static void syscall_handler (struct intr_frame *);
 
+struct semaphore using_fs;
+
 typedef void (*handler) (struct intr_frame *);
 static void syscall_exit (struct intr_frame *);
 static void syscall_exec (struct intr_frame *);
@@ -32,6 +34,8 @@ syscall_init (void)
 {
   intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
 
+	sema_init(&using_fs, 0);
+
   /* Any syscall not registered here should be NULL (0) in the call array. */
   memset(call, 0, SYSCALL_MAX_CODE + 1);
 
@@ -50,8 +54,10 @@ syscall_init (void)
 static void
 syscall_handler (struct intr_frame *f)
 {
+	sema_up(&using_fs);
   int syscall_code = *((int*)f->esp);
   call[syscall_code](f);
+	sema_down(&using_fs);
 }
 
 static void
@@ -82,22 +88,24 @@ syscall_open (struct intr_frame *f)
   struct file* filepointer = filesys_open(name);
 
 
-	struct file_descriptor *descriptor = malloc (sizeof (struct file_descriptor));
-    if (!descriptor)
-      syscall_exit (-1);
+	struct file_descriptor * desc = malloc (sizeof (struct file_descriptor));
+  if (!desc){
+		f->eax = -1;
+		return;
+	}
 
-			struct thread * current = thread_current();
+	desc->fd = timer_ticks();
+	desc->file = filepointer;
 
-    descriptor->fd = timer_ticks();
-    descriptor->file = filepointer;
+	struct thread * current = thread_current();
 
-    hash_insert (&current->fd_table, &descriptor->h_elem);
+  hash_insert (&current->fd_table, &desc->h_elem);
   // take filepointer
   // generate a fd (we use timer tick)
   // put fd into a hashtable
   // store in another table the <hash(fd), filepointer>
   // return fd
-	f->eax = -1;
+	f->eax = desc->fd;
 }
 
 static void

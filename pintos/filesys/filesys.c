@@ -81,13 +81,6 @@ filesys_open (const char *name)
   struct file * fp = file_open (inode);
 	if(fp != NULL){
 		//generate fd, store fd-fp into table from 2
-
-		// struct fd * file_desc = malloc(sizeof(struct fd));
-		// file_desc->id = timer_ticks();
-		//
-		// struct thread * current = thread_current();
-
-		// hash_insert(&(current->file_table), &file_desc->element);
 		return fp;
 
 	} else {
