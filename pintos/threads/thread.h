@@ -107,7 +107,7 @@ struct thread
     struct list_elem elem;              /* List element. Used either for ready_list or sleeping_list. */
 
     /* needed for file syscalls*/
-		struct hash file_table;
+		struct hash fd_table;
 
 
 #ifdef USERPROG
@@ -191,5 +191,9 @@ void thread_sleep (int64_t wakeup_at);
 bool thread_priority_cmp (const struct list_elem* a,
   const struct list_elem* b,
   void* aux);
+
+
+bool fd_less_function (const struct hash_elem *a, const struct hash_elem *b, void *aux UNUSED);
+unsigned fd_hash_function (const struct hash_elem *e, void *aux UNUSED);
 
 #endif /* threads/thread.h */

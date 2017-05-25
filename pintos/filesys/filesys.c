@@ -81,13 +81,6 @@ filesys_open (const char *name)
   struct file * fp = file_open (inode);
 	if(fp != NULL){
 		//generate fd, store fd-fp into table from 2
-
-		// struct fd * file_desc = malloc(sizeof(struct fd));
-		// file_desc->id = timer_ticks();
-		//
-		// struct thread * current = thread_current();
-
-		// hash_insert(&(current->file_table), &file_desc->element);
 		return fp;
 
 	} else {
@@ -121,14 +114,14 @@ do_format (void)
   printf ("done.\n");
 }
 
-bool item_compare(const struct hash_elem * a, const struct hash_elem * b){
-	struct fd_hash_item * fa = hash_entry(a, struct fd_hash_item, element);
-	struct fd_hash_item * fb = hash_entry(b, struct fd_hash_item, element);
-
-	return fa->fd > fb->fd;
-}
-
-unsigned item_hash(const struct hash_elem * e, void* aux){
-  struct fd_hash_item* i = hash_entry(e, struct fd_hash_item, element);
-  return hash_int(i->fd);
-}
+// bool item_compare(const struct hash_elem * a, const struct hash_elem * b){
+// 	struct fd_hash_item * fa = hash_entry(a, struct fd_hash_item, element);
+// 	struct fd_hash_item * fb = hash_entry(b, struct fd_hash_item, element);
+//
+// 	return fa->fd > fb->fd;
+// }
+//
+// unsigned item_hash(const struct hash_elem * e, void* aux){
+//   struct fd_hash_item* i = hash_entry(e, struct fd_hash_item, element);
+//   return hash_int(i->fd);
+// }

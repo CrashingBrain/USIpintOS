@@ -161,12 +161,13 @@ thread_init (void)
   list_init (&all_list);
 
 
+
+
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
   init_thread (initial_thread, "main", PRI_DEFAULT);
   initial_thread->status = THREAD_RUNNING;
   initial_thread->tid = allocate_tid ();
-
 
 
 #ifdef USERPROG
@@ -876,6 +877,24 @@ allocate_tid (void)
   lock_release (&tid_lock);
 
   return tid;
+}
+
+
+//this function returns the fd associated to a certain hash element
+unsigned fd_hash_function (const struct hash_elem *e,
+												 void *aux UNUSED){
+  struct file_descriptor * descriptor =  hash_entry (e, struct file_descriptor, h_elem);
+  return descriptor->fd;
+}
+
+//this function return the lesser fd of file descriptors
+bool fd_less_function (const struct hash_elem *a,
+                     const struct hash_elem *b,
+                     void *aux UNUSED){
+  struct file_descriptor *d_a =  hash_entry (a, struct file_descriptor, h_elem);
+  struct file_descriptor *d_b =  hash_entry (b, struct file_descriptor, h_elem);
+
+  return d_a->fd < d_b->fd;
 }
 
 
