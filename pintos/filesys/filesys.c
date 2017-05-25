@@ -15,10 +15,7 @@ struct block *fs_device;
 
 static void do_format (void);
 
-struct fd {
-	int id;
-	struct hash_elem element;
-};
+
 
 /* Initializes the file system module.
    If FORMAT is true, reformats the file system. */
@@ -125,8 +122,13 @@ do_format (void)
 }
 
 bool item_compare(const struct hash_elem * a, const struct hash_elem * b){
-	struct fd * fa = hash_entry(a, struct fd, element);
-	struct fd * fb = hash_entry(b, struct fd, element);
+	struct fd_hash_item * fa = hash_entry(a, struct fd_hash_item, element);
+	struct fd_hash_item * fb = hash_entry(b, struct fd_hash_item, element);
 
-	return fa->id > fb->id;
+	return fa->fd > fb->fd;
+}
+
+unsigned item_hash(const struct hash_elem * e, void* aux){
+  struct fd_hash_item* i = hash_entry(e, struct fd_hash_item, element);
+  return hash_int(i->fd);
 }

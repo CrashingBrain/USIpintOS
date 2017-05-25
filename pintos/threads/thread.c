@@ -4,6 +4,7 @@
 #include <random.h>
 #include <stdio.h>
 #include <string.h>
+#include <kernel/hash.h>
 #include "threads/flags.h"
 #include "threads/interrupt.h"
 #include "threads/intr-stubs.h"
@@ -743,7 +744,7 @@ init_thread (struct thread *t, const char *name, int priority)
 
   t->stack = (uint8_t *) t + PGSIZE;
   /* Initialize hashtable for storage of filepointers list */
-	// hash_init(&(t->file_table), hash_int, item_compare, NULL);
+	// hash_init(&(t->file_table), item_hash, item_compare, NULL);
 
 
 
