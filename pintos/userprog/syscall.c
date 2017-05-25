@@ -158,11 +158,14 @@ static void
 syscall_write (struct intr_frame *f)
 {
   int *stack = f->esp;
-  ASSERT (*(stack+1) == 1); // fd 1 means stdout (standard output)
-  char * buffer = *(stack+2);
-  int    length = *(stack+3);
-  putbuf (buffer, length);
-  f->eax = length;
+  // ASSERT (*(stack+1) == 1); // fd 1 means stdout (standard output)
+  int fd = *(stack+1);
+  if(fd == 1){
+    char * buffer = *(stack+2);
+    int    length = *(stack+3);
+    putbuf (buffer, length);
+    f->eax = length;
+  }
 }
 
 static bool check_user_address (void * ptr) {
