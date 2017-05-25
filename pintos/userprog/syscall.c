@@ -14,6 +14,7 @@
 static void syscall_handler (struct intr_frame *);
 
 struct semaphore using_fs;
+struct lock filesys_lock;
 
 typedef void (*handler) (struct intr_frame *);
 static void syscall_exit (struct intr_frame *);
@@ -80,12 +81,10 @@ syscall_create (struct intr_frame *f)
   if (check_user_address (name))
   {
     bool result = filesys_create (name, size);
-    // printf("CAZZO CREATE %s %u RESULT: %d\n", name, size, result);
     f->eax = result;
   }
   else
   {
-    // printf("CAZZO %s %u\n", name, size);
     *(stack+1) = -1;
     syscall_exit(f);
   }
@@ -96,27 +95,35 @@ syscall_open (struct intr_frame *f)
 {
   int *stack = f->esp;
 	char * name = (char *) *(stack + 1);
-  struct file* filepointer = filesys_open(name);
+
+  if (check_user_address(name))
+  {
+    struct file* filepointer = filesys_open(name);
 
 
-	struct file_descriptor * desc = malloc (sizeof (struct file_descriptor));
-  if (!desc){
-		f->eax = -1;
-		return;
-	}
+    struct file_descriptor * desc = malloc (sizeof (struct file_descriptor));
+    if (!desc){
+      f->eax = -1;
+      return;
+    }
 
-	desc->fd = timer_ticks();
-	desc->file = filepointer;
+    desc->fd = timer_ticks();
+    desc->file = filepointer;
 
-	struct thread * current = thread_current();
+    struct thread * current = thread_current();
 
-  hash_insert (&current->fd_table, &desc->h_elem);
-  // take filepointer
-  // generate a fd (we use timer tick)
-  // put fd into a hashtable
-  // store in another table the <hash(fd), filepointer>
-  // return fd
-	f->eax = desc->fd;
+    hash_insert (&current->fd_table, &desc->h_elem);
+    // take filepointer
+    // generate a fd (we use timer tick)
+    // put fd into a hashtable
+    // store in another table the <hash(fd), filepointer>
+    // return fd
+    f->eax = desc->fd;
+  } else {
+    *(stack+1) = -1;
+    syscall_exit(f);
+  }
+  
 }
 
 static void
