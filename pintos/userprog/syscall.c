@@ -25,6 +25,7 @@ static void syscall_halt (struct intr_frame *);
 static void syscall_create (struct intr_frame *f);
 static void syscall_remove (struct intr_frame *f);
 static void syscall_open (struct intr_frame *f);
+static void syscall_close (struct intr_frame *f);
 static bool check_user_address (void *);
 
 #define SYSCALL_MAX_CODE 19
@@ -50,6 +51,7 @@ syscall_init (void)
 	call[SYS_CREATE] = syscall_create; /* Creates a new file. */
 	call[SYS_REMOVE] = syscall_remove; /* Removes a file. */
 	call[SYS_OPEN] = syscall_open; /* Opens a file. */
+  call[SYS_CLOSE] = syscall_close; /* Closes a file */
 }
 
 static void
@@ -124,6 +126,24 @@ syscall_open (struct intr_frame *f)
     syscall_exit(f);
   }
   
+}
+
+static void
+syscall_close (struct intr_frame *f){
+  int *stack = f->esp;
+  int fd = *(stack+1);
+
+  if (fd > 1) // error if closing stdin or stdout
+  {
+    // iterate in list of files
+    // find for corrensonding fd
+    // get filepointer
+    // call file_close(filepointer)
+    // remove from list/hash
+    // return
+  }
+  return;
+
 }
 
 static void
