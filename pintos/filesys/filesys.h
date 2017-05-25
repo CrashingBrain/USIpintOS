@@ -12,7 +12,7 @@
 /* Block device that contains the file system. */
 struct block *fs_device;
 
-struct fd_hash_item {
+struct filedescriptor_hash_item {
 	int fd;
 	struct file * filepointer;
 	struct hash_elem element;
