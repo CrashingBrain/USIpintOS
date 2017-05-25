@@ -21,6 +21,7 @@ static void syscall_exit (struct intr_frame *);
 static void syscall_exec (struct intr_frame *);
 static void syscall_wait (struct intr_frame *);
 static void syscall_write (struct intr_frame *);
+static void syscall_read (struct intr_frame *);
 static void syscall_halt (struct intr_frame *);
 static void syscall_create (struct intr_frame *f);
 static void syscall_remove (struct intr_frame *f);
@@ -47,6 +48,7 @@ syscall_init (void)
   call[SYS_EXEC]  = syscall_exec;   /* Start another process. */
   call[SYS_WAIT]  = syscall_wait;   /* Wait for a child process to die. */
   call[SYS_WRITE] = syscall_write;  /* Write to a file. */
+  call[SYS_READ] = syscall_read;    /* Read from a file. */
 	call[SYS_HALT] = syscall_halt;	/* Halts pintOS. */
 	call[SYS_CREATE] = syscall_create; /* Creates a new file. */
 	call[SYS_REMOVE] = syscall_remove; /* Removes a file. */
@@ -141,6 +143,7 @@ syscall_close (struct intr_frame *f){
     // call file_close(filepointer)
     // remove from list/hash
     // return
+    // ALSO make syscall_exit call this for every own files (if tests still don't pass)
   }
   return;
 
@@ -185,14 +188,38 @@ static void
 syscall_write (struct intr_frame *f)
 {
   int *stack = f->esp;
-  // ASSERT (*(stack+1) == 1); // fd 1 means stdout (standard output)
   int fd = *(stack+1);
+  // get buffer at stack+2
+  // get size at stack+3
   if(fd == 1){
     char * buffer = *(stack+2);
     int    length = *(stack+3);
     putbuf (buffer, length);
     f->eax = length;
   }
+  // else
+  // iterate in list of files
+  // find for corrensonding fd
+  // get filepointer
+  // call file_write(fd, buffer, size)
+  // store number of bytes wrote in eax
+
+static void 
+syscall_read (struct intr_frame *f){
+  int *stack = f->esp;
+  int fd = *(stack+1);
+  // get buffer at stack+2
+  // get size at stack+3
+
+  // if fd == 0
+  // use getc() to read from stdin
+  // else
+  // iterate in list of files
+  // find for corrensonding fd
+  // get filepointer
+  // call file_read(fd, buffer, size)
+  // store number of bytes read in eax
+
 }
 
 static bool check_user_address (void * ptr) {
