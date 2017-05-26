@@ -170,10 +170,26 @@ syscall_close (struct intr_frame *f){
   {
     // iterate in list of files
     // find for corrensonding fd
+    struct file_descriptor to_find;
+    to_find.fd = fd;
+    struct hash_elem * e = hash_find(&fd_table, &to_find.h_elem);
+    if(e == NULL){
+      // fail silently
+      return;
+    }
     // get filepointer
+    struct file_descriptor * found =  hash_entry (e, struct file_descriptor, h_elem);
+    if(found == NULL){
+      // fail silently
+      return;
+    }
+    struct file * to_close = found->file;
     // call file_close(filepointer)
+    file_close(to_close);
     // remove from list/hash
-    // return
+    hash_delete(&fd_table, &to_find.h_elem);
+    free(found);
+    return;
     // ALSO make syscall_exit call this for every own files (if tests still don't pass)
   }
   return;
