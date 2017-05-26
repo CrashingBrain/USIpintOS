@@ -235,7 +235,7 @@ syscall_write (struct intr_frame *f){
 		to_find.fd = fd;
 		struct hash_elem * e = hash_find(&fd_table, &to_find.h_elem);
 		if(e == NULL){
-			*(stack+1) = 0;
+			*(stack+1) = -1;
 	    syscall_exit(f);
 		}
 		struct file_descriptor * found =  hash_entry (e, struct file_descriptor, h_elem);
