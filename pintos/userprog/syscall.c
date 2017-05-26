@@ -213,24 +213,37 @@ syscall_wait (struct intr_frame * f)
 }
 
 static void
-syscall_write (struct intr_frame *f)
-{
+syscall_write (struct intr_frame *f){
   int *stack = f->esp;
   int fd = *(stack+1);
-  // get buffer at stack+2
-  // get size at stack+3
-  if(fd == 1){
+	char * to_read = *(stack+2);
+	int size = *(stack+3);
+
+	if (fd == 0){
+		*(stack+1) = -1;
+    syscall_exit(f);
+	} else if(fd == 1){
     char * buffer = *(stack+2);
     int    length = *(stack+3);
     putbuf (buffer, length);
     f->eax = length;
-  }
-  // else
-  // iterate in list of files
-  // find for corrensonding fd
-  // get filepointer
-  // call file_write(fd, buffer, size)
-  // store number of bytes wrote in eax
+  } else {
+		struct file_descriptor to_find;
+		to_find.fd = fd;
+		struct hash_elem * e = hash_find(&fd_table, &to_find.h_elem);
+		if(e == NULL){
+			printf("CAZZO WRITE NULL\n");
+			*(stack+1) = 0;
+	    syscall_exit(f);
+		}
+		printf("CAZZO WRITE NOT NULL\n");
+		struct file_descriptor * found =  hash_entry (e, struct file_descriptor, h_elem);
+		struct file * to_write = found->file;
+
+		int bytes_written = file_write(to_read, to_write, size);
+		f->eax = bytes_written;
+	}
+
 }
 
 static void
@@ -258,21 +271,18 @@ syscall_read (struct intr_frame *f){
 		struct file_descriptor to_find;
 		to_find.fd = fd;
 		struct hash_elem * e = hash_find(&fd_table, &to_find.h_elem);
+		if(e == NULL){
+			printf("CAZZO READ NULL\n");
+			*(stack+1) = 0;
+	    syscall_exit(f);
+		}
+		printf("CAZZO READ NOT NULL\n");
 		struct file_descriptor * found =  hash_entry (e, struct file_descriptor, h_elem);
 		struct file * to_read = found->file;
 
 		int bytes_read = file_read(to_read, to_write, size);
 		f->eax = bytes_read;
 	}
-
-  // if fd == 0
-  // use getc() to read from stdin
-  // else
-  // iterate in list of files
-  // find for corrensonding fd
-  // get filepointer
-  // call file_read(fd, buffer, size)
-  // store number of bytes read in eax
 
 }
 
