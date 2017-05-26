@@ -31,6 +31,9 @@ static void syscall_create (struct intr_frame *f);
 static void syscall_remove (struct intr_frame *f);
 static void syscall_open (struct intr_frame *f);
 static void syscall_close (struct intr_frame *f);
+static void syscall_tell (struct intr_frame *f);
+static void syscall_seek (struct intr_frame *f);
+static void syscall_filesize (struct intr_frame *f);
 static bool check_user_address (void *);
 
 #define SYSCALL_MAX_CODE 19
@@ -82,6 +85,9 @@ syscall_init (void)
 	call[SYS_REMOVE] = syscall_remove; /* Removes a file. */
 	call[SYS_OPEN] = syscall_open; /* Opens a file. */
   call[SYS_CLOSE] = syscall_close; /* Closes a file */
+	call[SYS_FILESIZE] = syscall_filesize;
+	call[SYS_SEEK] = syscall_seek;
+	call[SYS_TELL] = syscall_tell;
 }
 
 static void
@@ -232,6 +238,74 @@ syscall_wait (struct intr_frame * f)
 }
 
 static void
+syscall_filesize (struct intr_frame * f)
+{
+	int *stack = f->esp;
+	int fd = *(stack+1);
+
+
+	struct file_descriptor to_find;
+	to_find.fd = fd;
+	struct hash_elem * e = hash_find(&fd_table, &to_find.h_elem);
+	if(e == NULL){
+		*(stack+1) = -1;
+		syscall_exit(f);
+	}
+	struct file_descriptor * found =  hash_entry (e, struct file_descriptor, h_elem);
+	if(found == NULL){
+		*(stack+1) = -1;
+		syscall_exit(f);
+	}
+	struct file * to_check = found->file;
+	f->eax = file_length(to_check);
+}
+
+static void
+syscall_tell (struct intr_frame * f)
+{
+	int *stack = f->esp;
+	int fd = *(stack+1);
+
+	struct file_descriptor to_find;
+	to_find.fd = fd;
+	struct hash_elem * e = hash_find(&fd_table, &to_find.h_elem);
+	if(e == NULL){
+		*(stack+1) = -1;
+		syscall_exit(f);
+	}
+	struct file_descriptor * found =  hash_entry (e, struct file_descriptor, h_elem);
+	if(found == NULL){
+		*(stack+1) = -1;
+		syscall_exit(f);
+	}
+	struct file * to_check = found->file;
+	f->eax = file_tell(to_check);
+}
+
+static void
+syscall_seek (struct intr_frame * f)
+{
+	int *stack = f->esp;
+	int fd = *(stack+1);
+	off_t position = *(stack+2);
+
+	struct file_descriptor to_find;
+	to_find.fd = fd;
+	struct hash_elem * e = hash_find(&fd_table, &to_find.h_elem);
+	if(e == NULL){
+		*(stack+1) = -1;
+		syscall_exit(f);
+	}
+	struct file_descriptor * found =  hash_entry (e, struct file_descriptor, h_elem);
+	if(found == NULL){
+		*(stack+1) = -1;
+		syscall_exit(f);
+	}
+	struct file * to_check = found->file;
+	file_seek(to_check, position);
+}
+
+static void
 syscall_write (struct intr_frame *f){
   int *stack = f->esp;
   int fd = *(stack+1);
@@ -319,7 +393,6 @@ syscall_read (struct intr_frame *f){
 		}
 
 		int bytes_read = file_read(to_read, to_write, size);
-		printf("CAZZO READ %d\n", bytes_read);
 		f->eax = bytes_read;
 	}
 
