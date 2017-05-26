@@ -235,13 +235,18 @@ syscall_write (struct intr_frame *f){
 		to_find.fd = fd;
 		struct hash_elem * e = hash_find(&fd_table, &to_find.h_elem);
 		if(e == NULL){
-			printf("CAZZO WRITE NULL\n");
 			*(stack+1) = 0;
 	    syscall_exit(f);
 		}
-		printf("CAZZO WRITE NOT NULL\n");
 		struct file_descriptor * found =  hash_entry (e, struct file_descriptor, h_elem);
+		if(found == NULL){
+			*(stack+1) = -1;
+	    syscall_exit(f);
+		}
 		struct file * to_write = found->file;
+		if(to_write == NULL){
+			printf("CAZZO WRITE NULL\n");
+		}
 
 		int bytes_written = file_write(to_read, to_write, size);
 		f->eax = bytes_written;
@@ -275,13 +280,18 @@ syscall_read (struct intr_frame *f){
 		to_find.fd = fd;
 		struct hash_elem * e = hash_find(&fd_table, &to_find.h_elem);
 		if(e == NULL){
-			printf("CAZZO READ NULL\n");
+			*(stack+1) = -1;
+	    syscall_exit(f);
+		}
+		struct file_descriptor * found =  hash_entry (e, struct file_descriptor, h_elem);
+		if(found == NULL){
 			*(stack+1) = 0;
 	    syscall_exit(f);
 		}
-		printf("CAZZO READ NOT NULL\n");
-		struct file_descriptor * found =  hash_entry (e, struct file_descriptor, h_elem);
 		struct file * to_read = found->file;
+		if(to_read == NULL){
+			printf("CAZZO WRITE NULL \n");
+		}
 
 		int bytes_read = file_read(to_read, to_write, size);
 		f->eax = bytes_read;
