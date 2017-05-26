@@ -12,16 +12,6 @@
 /* Block device that contains the file system. */
 struct block *fs_device;
 
-struct file_descriptor {
-	int fd;
-	struct file * file;
-	struct hash_elem h_elem;
-};
-
-
-bool item_compare(const struct hash_elem * a, const struct hash_elem * b);
-unsigned item_hash(const struct hash_elem * e, void* aux);
-
 void filesys_init (bool format);
 void filesys_done (void);
 bool filesys_create (const char *name, off_t initial_size);

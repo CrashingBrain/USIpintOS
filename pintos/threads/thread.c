@@ -160,14 +160,14 @@ thread_init (void)
   list_init (&sleeping_list);
   list_init (&all_list);
 
-
-
-
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
+
   init_thread (initial_thread, "main", PRI_DEFAULT);
   initial_thread->status = THREAD_RUNNING;
   initial_thread->tid = allocate_tid ();
+
+
 
 
 #ifdef USERPROG
@@ -175,6 +175,8 @@ thread_init (void)
   initial_thread->parent = NULL;
   /* Use this semaphore to allow the new thread to wait for its own children to be created. */
   sema_init(&initial_thread->sem_child_loaded, 0);
+
+
 #endif
 }
 
@@ -745,9 +747,6 @@ init_thread (struct thread *t, const char *name, int priority)
 
   t->stack = (uint8_t *) t + PGSIZE;
   /* Initialize hashtable for storage of filepointers list */
-	// hash_init(&(t->file_table), item_hash, item_compare, NULL);
-
-
 
   t->priority = priority;
   /* Do the following in case the multilevel feedback queue scheduler
@@ -759,7 +758,10 @@ init_thread (struct thread *t, const char *name, int priority)
     thread_recalculate_priority(t, NULL);
   }
 
+
+
   t->magic = THREAD_MAGIC;
+
 
   list_push_back (&all_list, &t->allelem);
 }
@@ -877,24 +879,6 @@ allocate_tid (void)
   lock_release (&tid_lock);
 
   return tid;
-}
-
-
-//this function returns the fd associated to a certain hash element
-unsigned fd_hash_function (const struct hash_elem *e,
-												 void *aux UNUSED){
-  struct file_descriptor * descriptor =  hash_entry (e, struct file_descriptor, h_elem);
-  return descriptor->fd;
-}
-
-//this function return the lesser fd of file descriptors
-bool fd_less_function (const struct hash_elem *a,
-                     const struct hash_elem *b,
-                     void *aux UNUSED){
-  struct file_descriptor *d_a =  hash_entry (a, struct file_descriptor, h_elem);
-  struct file_descriptor *d_b =  hash_entry (b, struct file_descriptor, h_elem);
-
-  return d_a->fd < d_b->fd;
 }
 
 

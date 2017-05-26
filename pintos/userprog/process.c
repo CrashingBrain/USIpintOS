@@ -96,10 +96,7 @@ process_execute (const char * command)
   struct thread * cur = thread_current();
 
 
-	hash_init(&cur->fd_table,
-		&fd_hash_function,
-		&fd_less_function,
-		NULL);
+
 
   /* Make a copy of COMMAND.
      Otherwise there's a race between the caller and load(). */

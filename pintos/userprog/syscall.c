@@ -10,10 +10,13 @@
 #include "filesys/file.h"
 #include "userprog/process.h"
 #include "devices/shutdown.h"
+#include "devices/timer.h"
 
 static void syscall_handler (struct intr_frame *);
 
 struct semaphore using_fs;
+struct hash fd_table;
+
 struct lock filesys_lock;
 
 typedef void (*handler) (struct intr_frame *);
@@ -32,12 +35,36 @@ static bool check_user_address (void *);
 #define SYSCALL_MAX_CODE 19
 static handler call[SYSCALL_MAX_CODE + 1];
 
+
+//this function returns the fd associated to a certain hash element
+unsigned fd_hash_function (const struct hash_elem *e,
+												 void *aux UNUSED){
+  struct file_descriptor * descriptor =  hash_entry (e, struct file_descriptor, h_elem);
+  return descriptor->fd;
+}
+
+//this function return the lesser fd of file descriptors
+bool fd_less_function (const struct hash_elem *a,
+                     const struct hash_elem *b,
+                     void *aux UNUSED){
+  struct file_descriptor *d_a =  hash_entry (a, struct file_descriptor, h_elem);
+  struct file_descriptor *d_b =  hash_entry (b, struct file_descriptor, h_elem);
+
+  return d_a->fd < d_b->fd;
+}
+
+
 void
 syscall_init (void)
 {
   intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
 
-	sema_init(&using_fs, 0);
+	hash_init(&fd_table,
+		&fd_hash_function,
+		&fd_less_function,
+		NULL);
+
+	sema_init(&using_fs, 1);
 
   /* Any syscall not registered here should be NULL (0) in the call array. */
   memset(call, 0, SYSCALL_MAX_CODE + 1);
@@ -116,7 +143,7 @@ syscall_open (struct intr_frame *f)
 
     struct thread * current = thread_current();
 
-    hash_insert (&current->fd_table, &desc->h_elem);
+    hash_insert (&fd_table, &desc->h_elem);
     // take filepointer
     // generate a fd (we use timer tick)
     // put fd into a hashtable
@@ -127,7 +154,7 @@ syscall_open (struct intr_frame *f)
     *(stack+1) = -1;
     syscall_exit(f);
   }
-  
+
 }
 
 static void
@@ -205,7 +232,7 @@ syscall_write (struct intr_frame *f)
   // store number of bytes wrote in eax
 }
 
-static void 
+static void
 syscall_read (struct intr_frame *f){
   int *stack = f->esp;
   int fd = *(stack+1);
