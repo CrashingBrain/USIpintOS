@@ -222,6 +222,11 @@ syscall_write (struct intr_frame *f){
 	char * to_read = *(stack+2);
 	int size = *(stack+3);
 
+	if(!check_user_address (to_read)){
+		*(stack+1) = -1;
+    syscall_exit(f);
+	}
+
 	if (fd == 0){
 		*(stack+1) = -1;
     syscall_exit(f);
@@ -259,6 +264,11 @@ syscall_read (struct intr_frame *f){
   int fd = *(stack+1);
 	char * to_write = *(stack+2);
 	int size = *(stack+3);
+
+	if(!check_user_address (to_write)){
+		*(stack+1) = -1;
+		syscall_exit(f);
+	}
 
 	if(fd == 0){
 		// getc();
