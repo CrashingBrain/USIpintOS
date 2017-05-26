@@ -287,7 +287,6 @@ syscall_read (struct intr_frame *f){
 	}
 
 	if(fd == 0){
-		// getc();
 		char c;
 		int i=0;
 		while (i < size){
@@ -315,9 +314,12 @@ syscall_read (struct intr_frame *f){
 		}
 		struct file * to_read = found->file;
 		if(to_read == NULL){
+			*(stack+1) = 0;
+	    syscall_exit(f);
 		}
 
 		int bytes_read = file_read(to_read, to_write, size);
+		printf("CAZZO READ %d\n", bytes_read);
 		f->eax = bytes_read;
 	}
 
