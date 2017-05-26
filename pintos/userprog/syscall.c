@@ -245,10 +245,9 @@ syscall_write (struct intr_frame *f){
 		}
 		struct file * to_write = found->file;
 		if(to_write == NULL){
-			printf("CAZZO WRITE NULL\n");
 		}
 
-		int bytes_written = file_write(to_read, to_write, size);
+		int bytes_written = file_write(to_write, to_read, size);
 		f->eax = bytes_written;
 	}
 
