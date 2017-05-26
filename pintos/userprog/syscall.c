@@ -315,7 +315,6 @@ syscall_read (struct intr_frame *f){
 		}
 		struct file * to_read = found->file;
 		if(to_read == NULL){
-			printf("CAZZO WRITE NULL \n");
 		}
 
 		int bytes_read = file_read(to_read, to_write, size);
