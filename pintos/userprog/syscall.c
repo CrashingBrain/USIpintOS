@@ -203,6 +203,7 @@ syscall_write (struct intr_frame *f)
   // get filepointer
   // call file_write(fd, buffer, size)
   // store number of bytes wrote in eax
+}
 
 static void 
 syscall_read (struct intr_frame *f){
