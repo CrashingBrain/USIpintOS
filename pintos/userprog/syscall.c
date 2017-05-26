@@ -148,10 +148,13 @@ syscall_open (struct intr_frame *f)
       return;
     }
 
+		struct thread * current = thread_current();
+
+
     desc->fd = timer_ticks();
     desc->file = filepointer;
+		desc->owner = current->tid;
 
-    struct thread * current = thread_current();
 
     hash_insert (&fd_table, &desc->h_elem);
     // take filepointer
@@ -189,6 +192,10 @@ syscall_close (struct intr_frame *f){
       // fail silently
       return;
     }
+
+		if(found->owner != thread_current()->tid){
+			return;
+		}
     struct file * to_close = found->file;
     // call file_close(filepointer)
     file_close(to_close);

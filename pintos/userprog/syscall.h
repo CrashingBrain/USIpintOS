@@ -9,6 +9,7 @@ void syscall_init (void);
 
 struct file_descriptor {
 	int fd;
+	int owner;
 	struct file * file;
 	struct hash_elem h_elem;
 };
