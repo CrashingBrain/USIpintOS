@@ -131,7 +131,10 @@ syscall_open (struct intr_frame *f)
   if (check_user_address(name))
   {
     struct file* filepointer = filesys_open(name);
-
+    if (!filepointer){
+      f->eax = -1;
+      return;
+    }
 
     struct file_descriptor * desc = malloc (sizeof (struct file_descriptor));
     if (!desc){
