@@ -11,6 +11,7 @@
 #include "userprog/process.h"
 #include "devices/shutdown.h"
 #include "devices/timer.h"
+#include "devices/input.h"
 
 static void syscall_handler (struct intr_frame *);
 
@@ -236,8 +237,33 @@ static void
 syscall_read (struct intr_frame *f){
   int *stack = f->esp;
   int fd = *(stack+1);
-  // get buffer at stack+2
-  // get size at stack+3
+	char * to_write = *(stack+2);
+	int size = *(stack+3);
+
+	if(fd == 0){
+		// getc();
+		char c;
+		int i=0;
+		while (i < size){
+			c = input_getc();
+			*(to_write+i) = c;
+			i++;
+		}
+		f->eax = i;
+		return;
+	} else if(fd == 1){
+		*(stack+1) = -1;
+    syscall_exit(f);
+	} else {
+		struct file_descriptor to_find;
+		to_find.fd = fd;
+		struct hash_elem * e = hash_find(&fd_table, &to_find.h_elem);
+		struct file_descriptor * found =  hash_entry (e, struct file_descriptor, h_elem);
+		struct file * to_read = found->file;
+
+		int bytes_read = file_read(to_read, to_write, size);
+		f->eax = bytes_read;
+	}
 
   // if fd == 0
   // use getc() to read from stdin
